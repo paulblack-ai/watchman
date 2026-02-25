@@ -75,10 +75,11 @@ Plans:
   1. Lauren receives enriched tool entries in Slack for second-round review with approve/reject buttons
   2. Approved entries are written as JSON files to the output directory in IcebreakerAI-compatible schema
   3. Rejected entries are marked as rejected and do not produce output files
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md -- Gate 2 core: DB migration, Block Kit cards, action handlers, JSON output writer, enrichment pipeline wiring
+- [ ] 04-02-PLAN.md -- Tests: Gate 2 flow tests and JSON output writer tests
 
 ## Progress
 
