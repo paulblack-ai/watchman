@@ -16,10 +16,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Collection
 
-- [ ] **COLL-01**: System runs scheduled collectors on per-source cron frequencies using APScheduler
-- [ ] **COLL-02**: RSS collector parses RSS/Atom feeds and writes raw items to the database
-- [ ] **COLL-03**: HTTP/API collector fetches structured API responses and writes raw items to the database
-- [ ] **COLL-04**: Scrape collector extracts article content from web pages and writes raw items to the database
+- [x] **COLL-01**: System runs scheduled collectors on per-source cron frequencies using APScheduler
+- [x] **COLL-02**: RSS collector parses RSS/Atom feeds and writes raw items to the database
+- [x] **COLL-03**: HTTP/API collector fetches structured API responses and writes raw items to the database
+- [x] **COLL-04**: Scrape collector extracts article content from web pages and writes raw items to the database
 
 ### Signal Processing
 
@@ -93,10 +93,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SRC-02 | Phase 1 | Complete |
 | SRC-03 | Phase 1 | Complete |
 | SRC-04 | Phase 5 | Complete |
-| COLL-01 | Phase 7 | Pending |
-| COLL-02 | Phase 7 | Pending |
-| COLL-03 | Phase 7 | Pending |
-| COLL-04 | Phase 7 | Pending |
+| COLL-01 | Phase 7 | Complete |
+| COLL-02 | Phase 7 | Complete |
+| COLL-03 | Phase 7 | Complete |
+| COLL-04 | Phase 7 | Complete |
 | PROC-01 | Phase 5 | Complete |
 | PROC-02 | Phase 5 | Complete |
 | PROC-03 | Phase 5 | Complete |

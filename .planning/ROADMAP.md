@@ -16,9 +16,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Scoring and Slack Review** - LLM scoring, daily volume cap, and Slack review queue with approve/reject/snooze
 - [x] **Phase 3: Enrichment Pipeline** - Approval-gated enrichment producing draft tool entries validated against IcebreakerAI schema
 - [x] **Phase 4: Gate 2 and Output** - Second approval gate and JSON output emitter completing the pipeline end-to-end
-- [ ] **Phase 5: Wire Normalizer and Health Digest** - Connect normalizer and daily health digest to scheduler (gap closure)
+- [x] **Phase 5: Wire Normalizer and Health Digest** - Connect normalizer and daily health digest to scheduler (gap closure)
 - [x] **Phase 6: Tech Debt and Doc Sync** - Fix deprecated APIs, sync docs with actual state (gap closure)
-- [ ] **Phase 7: Audit Gap Closure — Runtime Fixes** - Fix critical collector registration, datetime awareness, and Gate 2 timestamp bugs
+- [x] **Phase 7: Audit Gap Closure — Runtime Fixes** - Fix critical collector registration, datetime awareness, and Gate 2 timestamp bugs
 
 ## Phase Details
 
@@ -97,7 +97,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 05-01-PLAN.md -- Wire normalizer and daily digest: add job functions to scheduler/jobs.py, wire into main.py, unit tests
+- [x] 05-01-PLAN.md -- Wire normalizer and daily digest: add job functions to scheduler/jobs.py, wire into main.py, unit tests
 
 ### Phase 6: Tech Debt and Doc Sync
 **Goal**: Fix deprecated APIs, sync documentation with actual state, and add missing verification artifacts
@@ -124,7 +124,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 07-01-PLAN.md -- Runtime fixes: collector import path, timezone-aware datetime defaults, Gate 2 conditional timestamp, targeted test coverage
+- [x] 07-01-PLAN.md -- Runtime fixes: collector import path, timezone-aware datetime defaults, Gate 2 conditional timestamp, targeted test coverage
 
 ## Progress
 
@@ -137,6 +137,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 2. Scoring and Slack Review | 2/2 | Complete | 2026-02-25 |
 | 3. Enrichment Pipeline | 2/2 | Complete | 2026-02-25 |
 | 4. Gate 2 and Output | 2/2 | Complete | 2026-02-25 |
-| 5. Wire Normalizer and Health Digest | 0/1 | Planned | - |
+| 5. Wire Normalizer and Health Digest | 1/1 | Complete | 2026-02-25 |
 | 6. Tech Debt and Doc Sync | 0/0 | Complete | 2026-02-25 |
-| 7. Audit Gap Closure — Runtime Fixes | 0/1 | Planned | - |
+| 7. Audit Gap Closure — Runtime Fixes | 1/1 | Complete | 2026-02-25 |
