@@ -1,5 +1,6 @@
 """Block Kit builder functions for Slack signal card messages."""
 
+from watchman.models.icebreaker import IcebreakerToolEntry
 from watchman.models.signal_card import SignalCard
 from watchman.scoring.models import RubricScore
 
@@ -215,5 +216,143 @@ def build_review_footer(showing: int, total: int) -> list[dict]:
                 }
             ],
         }
+    ]
+    return blocks
+
+
+def build_gate2_card_blocks(
+    card: SignalCard, entry: IcebreakerToolEntry, can_re_enrich: bool
+) -> list[dict]:
+    """Build Block Kit blocks for a Gate 2 enrichment review card.
+
+    Shows enrichment details (name, description, capabilities, pricing, API)
+    with approve/reject buttons and optional re-enrich button.
+    Differentiated from Gate 1 by :mag: prefix and enrichment detail fields.
+
+    Args:
+        card: SignalCard with enrichment data.
+        entry: Parsed IcebreakerToolEntry from enrichment.
+        can_re_enrich: Whether the re-enrich button should be shown.
+
+    Returns:
+        List of Slack Block Kit block dicts.
+    """
+    card_id = str(card.id)
+
+    capabilities_text = (
+        "\n".join(f"- {c}" for c in entry.capabilities[:5])
+        if entry.capabilities
+        else "_None extracted_"
+    )
+
+    pricing_text = entry.pricing or "Unknown"
+    api_text = entry.api_surface or "Unknown"
+
+    blocks: list[dict] = [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": f":mag: Gate 2 Review: {entry.name}",
+                "emoji": True,
+            },
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*<{card.url}|{card.title}>*\n{entry.description}",
+            },
+        },
+        {
+            "type": "section",
+            "fields": [
+                {
+                    "type": "mrkdwn",
+                    "text": f"*Capabilities:*\n{capabilities_text}",
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": f"*Pricing:* {pricing_text}\n*API:* {api_text}",
+                },
+            ],
+        },
+    ]
+
+    if entry.integration_hooks:
+        integrations = ", ".join(entry.integration_hooks)
+        blocks.append(
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": f":link: Integrations: {integrations}",
+                    }
+                ],
+            }
+        )
+
+    action_buttons: list[dict] = [
+        {
+            "type": "button",
+            "text": {"type": "plain_text", "text": "Approve", "emoji": True},
+            "style": "primary",
+            "action_id": "approve_gate2",
+            "value": card_id,
+        },
+        {
+            "type": "button",
+            "text": {"type": "plain_text", "text": "Reject", "emoji": True},
+            "style": "danger",
+            "action_id": "reject_gate2",
+            "value": card_id,
+        },
+    ]
+
+    if can_re_enrich:
+        action_buttons.append(
+            {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Re-enrich", "emoji": True},
+                "action_id": "re_enrich",
+                "value": card_id,
+            }
+        )
+
+    blocks.append({"type": "actions", "elements": action_buttons})
+    blocks.append({"type": "divider"})
+
+    return blocks
+
+
+def build_gate2_confirmed_blocks(card: SignalCard, action: str) -> list[dict]:
+    """Build Block Kit blocks for a Gate 2 card after a review action was taken.
+
+    Shows the card title and the result of the action. No action buttons
+    are included (removed after the human acts).
+
+    Args:
+        card: SignalCard that was reviewed.
+        action: One of "gate2_approved", "gate2_rejected", or "re_enriching".
+
+    Returns:
+        List of Slack Block Kit block dicts (no action buttons).
+    """
+    action_display = {
+        "gate2_approved": ":white_check_mark: Approved (output written)",
+        "gate2_rejected": ":x: Rejected",
+        "re_enriching": ":arrows_counterclockwise: Sent for re-enrichment",
+    }.get(action, action)
+
+    blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f":mag: *<{card.url}|{card.title}>*\n{action_display}",
+            },
+        },
+        {"type": "divider"},
     ]
     return blocks
