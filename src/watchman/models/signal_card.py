@@ -40,6 +40,12 @@ class SignalCard(BaseModel):
     slack_message_ts: str | None = None
     slack_channel_id: str | None = None
 
+    # Phase 3: enrichment fields
+    enrichment_state: str = "pending"
+    enrichment_data: str | None = None  # JSON string of IcebreakerToolEntry
+    enrichment_error: str | None = None
+    enriched_at: datetime | None = None
+
     @staticmethod
     def compute_url_hash(url: str) -> str:
         """Compute SHA-256 hash of normalized URL for exact deduplication."""

@@ -128,6 +128,43 @@ async def init_db(db_path: Path) -> None:
     # Apply Phase 2 schema migration (idempotent)
     await migrate_phase2(db_path)
 
+    # Apply Phase 3 schema migration (idempotent)
+    await migrate_phase3(db_path)
+
+
+async def migrate_phase3(db_path: Path) -> None:
+    """Apply Phase 3 schema migration: add enrichment columns to cards.
+
+    This migration is idempotent -- running it multiple times is safe.
+    Each ALTER TABLE is wrapped in try/except to handle duplicate column errors.
+
+    Args:
+        db_path: Path to the SQLite database file.
+    """
+    new_columns = [
+        "ALTER TABLE cards ADD COLUMN enrichment_state TEXT DEFAULT 'pending' CHECK(enrichment_state IN ('pending', 'in_progress', 'complete', 'failed', 'skipped'))",
+        "ALTER TABLE cards ADD COLUMN enrichment_data TEXT",
+        "ALTER TABLE cards ADD COLUMN enrichment_error TEXT",
+        "ALTER TABLE cards ADD COLUMN enriched_at TEXT",
+    ]
+
+    new_indexes = [
+        "CREATE INDEX IF NOT EXISTS idx_cards_enrichment_state ON cards(enrichment_state)",
+    ]
+
+    async with aiosqlite.connect(str(db_path)) as db:
+        for statement in new_columns:
+            try:
+                await db.execute(statement)
+            except Exception:
+                # Column already exists -- migration is idempotent
+                pass
+
+        for statement in new_indexes:
+            await db.execute(statement)
+
+        await db.commit()
+
 
 @asynccontextmanager
 async def get_connection(db_path: Path) -> AsyncGenerator[aiosqlite.Connection, None]:

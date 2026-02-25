@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 import aiosqlite
 
+from watchman.models.icebreaker import IcebreakerToolEntry
 from watchman.models.raw_item import RawItem
 from watchman.models.signal_card import SignalCard
 from watchman.scoring.models import RubricScore
@@ -295,6 +296,68 @@ class CardRepository:
         )
         await self.db.commit()
 
+    async def find_approved_unenriched(self) -> list[SignalCard]:
+        """Find all approved cards that have not been enriched yet.
+
+        Returns:
+            List of SignalCard instances with review_state='approved'
+            and enrichment_state='pending'.
+        """
+        async with self.db.execute(
+            """SELECT * FROM cards
+               WHERE review_state = 'approved'
+               AND enrichment_state = 'pending'
+               ORDER BY reviewed_at ASC"""
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [self._row_to_card(row) for row in rows]
+
+    async def save_enrichment(self, card_id: int, entry: IcebreakerToolEntry) -> None:
+        """Persist a successful enrichment result for a card.
+
+        Args:
+            card_id: ID of the card to update.
+            entry: Validated IcebreakerToolEntry with extracted tool data.
+        """
+        await self.db.execute(
+            """UPDATE cards
+               SET enrichment_state = 'complete',
+                   enrichment_data = ?,
+                   enriched_at = datetime('now')
+               WHERE id = ?""",
+            (entry.model_dump_json(), card_id),
+        )
+        await self.db.commit()
+
+    async def save_enrichment_error(self, card_id: int, error: str) -> None:
+        """Record an enrichment failure for a card.
+
+        Args:
+            card_id: ID of the card to update.
+            error: Error message describing the failure.
+        """
+        await self.db.execute(
+            """UPDATE cards
+               SET enrichment_state = 'failed',
+                   enrichment_error = ?
+               WHERE id = ?""",
+            (error, card_id),
+        )
+        await self.db.commit()
+
+    async def set_enrichment_state(self, card_id: int, state: str) -> None:
+        """Update the enrichment state of a card.
+
+        Args:
+            card_id: ID of the card to update.
+            state: New enrichment state (pending/in_progress/complete/failed/skipped).
+        """
+        await self.db.execute(
+            "UPDATE cards SET enrichment_state = ? WHERE id = ?",
+            (state, card_id),
+        )
+        await self.db.commit()
+
     async def snooze_card(self, card_id: int, days: int = 30) -> None:
         """Snooze a card for a given number of days.
 
@@ -329,6 +392,7 @@ class CardRepository:
 
         reviewed_at_raw = safe_get("reviewed_at")
         snooze_until_raw = safe_get("snooze_until")
+        enriched_at_raw = safe_get("enriched_at")
 
         return SignalCard(
             id=row["id"],
@@ -357,6 +421,13 @@ class CardRepository:
             ),
             slack_message_ts=safe_get("slack_message_ts"),
             slack_channel_id=safe_get("slack_channel_id"),
+            # Phase 3 fields
+            enrichment_state=safe_get("enrichment_state") or "pending",
+            enrichment_data=safe_get("enrichment_data"),
+            enrichment_error=safe_get("enrichment_error"),
+            enriched_at=(
+                datetime.fromisoformat(enriched_at_raw) if enriched_at_raw else None
+            ),
         )
 
 
