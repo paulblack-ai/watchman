@@ -253,6 +253,31 @@ def test_re_enrich_capped_at_3_attempts(
 
 
 @pytest.mark.integration
+def test_gate2_pending_does_not_set_reviewed_at(
+    tmp_db: Path, sample_entry: IcebreakerToolEntry
+) -> None:
+    """Setting gate2_state to 'pending' must NOT set gate2_reviewed_at."""
+    card_id = _insert_enriched_card(tmp_db, sample_entry)
+
+    async def _test() -> None:
+        async with get_connection(tmp_db) as db:
+            repo = CardRepository(db)
+            await repo.set_gate2_state(card_id, "pending", slack_ts="12345.67890")
+
+            async with db.execute(
+                "SELECT gate2_state, gate2_reviewed_at, gate2_slack_ts FROM cards WHERE id = ?",
+                (card_id,),
+            ) as cursor:
+                row = await cursor.fetchone()
+
+        assert row["gate2_state"] == "pending"
+        assert row["gate2_reviewed_at"] is None
+        assert row["gate2_slack_ts"] == "12345.67890"
+
+    asyncio.run(_test())
+
+
+@pytest.mark.integration
 def test_find_enriched_pending_gate2(
     tmp_db: Path, sample_entry: IcebreakerToolEntry
 ) -> None:
