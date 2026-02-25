@@ -121,7 +121,10 @@ Plans:
   2. All model datetime defaults use `datetime.now(timezone.utc)` (no naive datetimes)
   3. `gate2_reviewed_at` is only set when Gate 2 state transitions to approved/rejected (not on pending delivery)
   4. Collection E2E flow works: scheduler → get_collector() → raw items in DB
-**Plans**: 0 plans
+**Plans**: 1 plan
+
+Plans:
+- [ ] 07-01-PLAN.md -- Runtime fixes: collector import path, timezone-aware datetime defaults, Gate 2 conditional timestamp, targeted test coverage
 
 ## Progress
 
@@ -136,4 +139,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. Gate 2 and Output | 2/2 | Complete | 2026-02-25 |
 | 5. Wire Normalizer and Health Digest | 0/1 | Planned | - |
 | 6. Tech Debt and Doc Sync | 0/0 | Complete | 2026-02-25 |
-| 7. Audit Gap Closure — Runtime Fixes | 0/0 | Not started | - |
+| 7. Audit Gap Closure — Runtime Fixes | 0/1 | Planned | - |
