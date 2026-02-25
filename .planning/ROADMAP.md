@@ -14,10 +14,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Collection Pipeline** - Source registry, collectors, normalization, deduplication, and database foundation
 - [x] **Phase 2: Scoring and Slack Review** - LLM scoring, daily volume cap, and Slack review queue with approve/reject/snooze
-- [ ] **Phase 3: Enrichment Pipeline** - Approval-gated enrichment producing draft tool entries validated against IcebreakerAI schema
-- [ ] **Phase 4: Gate 2 and Output** - Second approval gate and JSON output emitter completing the pipeline end-to-end
+- [x] **Phase 3: Enrichment Pipeline** - Approval-gated enrichment producing draft tool entries validated against IcebreakerAI schema
+- [x] **Phase 4: Gate 2 and Output** - Second approval gate and JSON output emitter completing the pipeline end-to-end
 - [ ] **Phase 5: Wire Normalizer and Health Digest** - Connect normalizer and daily health digest to scheduler (gap closure)
-- [ ] **Phase 6: Tech Debt and Doc Sync** - Fix deprecated APIs, sync docs with actual state (gap closure)
+- [x] **Phase 6: Tech Debt and Doc Sync** - Fix deprecated APIs, sync docs with actual state (gap closure)
+- [ ] **Phase 7: Audit Gap Closure — Runtime Fixes** - Fix critical collector registration, datetime awareness, and Gate 2 timestamp bugs
 
 ## Phase Details
 
@@ -110,10 +111,22 @@ Plans:
   4. Phases 1 and 3 have VERIFICATION.md files
 **Plans**: 0 plans
 
+### Phase 7: Audit Gap Closure — Runtime Fixes
+**Goal**: Fix critical runtime bugs found by v1.0 milestone audit — collector registration, datetime awareness, and Gate 2 timestamp logic
+**Depends on**: Phase 1
+**Requirements**: COLL-01, COLL-02, COLL-03, COLL-04
+**Gap Closure:** Closes all gaps from v1.0 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. `get_collector()` resolves registered collectors at runtime (COLLECTOR_REGISTRY populated via `__init__.py` imports)
+  2. All model datetime defaults use `datetime.now(timezone.utc)` (no naive datetimes)
+  3. `gate2_reviewed_at` is only set when Gate 2 state transitions to approved/rejected (not on pending delivery)
+  4. Collection E2E flow works: scheduler → get_collector() → raw items in DB
+**Plans**: 0 plans
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -122,4 +135,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Enrichment Pipeline | 2/2 | Complete | 2026-02-25 |
 | 4. Gate 2 and Output | 2/2 | Complete | 2026-02-25 |
 | 5. Wire Normalizer and Health Digest | 0/1 | Planned | - |
-| 6. Tech Debt and Doc Sync | 0/0 | Not started | - |
+| 6. Tech Debt and Doc Sync | 0/0 | Complete | 2026-02-25 |
+| 7. Audit Gap Closure — Runtime Fixes | 0/0 | Not started | - |
