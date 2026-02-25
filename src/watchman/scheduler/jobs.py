@@ -53,14 +53,57 @@ def collect_source(source: SourceConfig, db_path: Path) -> None:
         )
 
 
+def run_scoring_job(db_path: Path, rubric_path: Path) -> None:
+    """Sync wrapper that runs async scoring via asyncio.run().
+
+    Called by APScheduler's thread pool. Scores all unscored,
+    non-duplicate signal cards in the database.
+
+    Args:
+        db_path: Path to the SQLite database.
+        rubric_path: Path to the rubric YAML config.
+    """
+    # Import here to avoid circular imports at module load time
+    from watchman.scoring.scorer import score_unscored_cards  # noqa: PLC0415
+
+    try:
+        scored = asyncio.run(score_unscored_cards(db_path, rubric_path))
+        logger.info("Scoring job complete: %d cards scored", scored)
+    except Exception:
+        logger.exception("Scoring job failed")
+
+
+def schedule_scoring_job(
+    scheduler: BackgroundScheduler, db_path: Path, rubric_path: Path
+) -> None:
+    """Register a dedicated 30-minute interval scoring job with the scheduler.
+
+    Args:
+        scheduler: The APScheduler BackgroundScheduler to add the job to.
+        db_path: Path to the SQLite database.
+        rubric_path: Path to the rubric YAML config.
+    """
+    scheduler.add_job(
+        run_scoring_job,
+        trigger=IntervalTrigger(minutes=30),
+        args=[db_path, rubric_path],
+        id="score-unscored-cards",
+        replace_existing=True,
+    )
+    logger.info("Scheduled scoring job every 30 minutes")
+
+
 def setup_scheduler(
-    sources: list[SourceConfig], db_path: Path
+    sources: list[SourceConfig], db_path: Path, rubric_path: Path | None = None
 ) -> BackgroundScheduler:
     """Create and configure APScheduler with jobs for each enabled source.
+
+    If rubric_path is provided, also schedules a dedicated 30-minute scoring job.
 
     Args:
         sources: List of enabled source configurations.
         db_path: Path to the SQLite database.
+        rubric_path: Optional path to rubric YAML; if provided, adds scoring job.
 
     Returns:
         Configured BackgroundScheduler (not started).
@@ -87,5 +130,8 @@ def setup_scheduler(
             source.type,
             source.frequency,
         )
+
+    if rubric_path is not None:
+        schedule_scoring_job(scheduler, db_path, rubric_path)
 
     return scheduler
