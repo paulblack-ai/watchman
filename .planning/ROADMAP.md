@@ -12,8 +12,8 @@ Watchman is a staged pipeline that collects AI ecosystem signals, scores them fo
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Collection Pipeline** - Source registry, collectors, normalization, deduplication, and database foundation
-- [ ] **Phase 2: Scoring and Slack Review** - LLM scoring, daily volume cap, and Slack review queue with approve/reject/snooze
+- [x] **Phase 1: Collection Pipeline** - Source registry, collectors, normalization, deduplication, and database foundation
+- [x] **Phase 2: Scoring and Slack Review** - LLM scoring, daily volume cap, and Slack review queue with approve/reject/snooze
 - [ ] **Phase 3: Enrichment Pipeline** - Approval-gated enrichment producing draft tool entries validated against IcebreakerAI schema
 - [ ] **Phase 4: Gate 2 and Output** - Second approval gate and JSON output emitter completing the pipeline end-to-end
 
@@ -32,9 +32,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project foundation: package setup, Pydantic models, source registry, SQLite database, repositories
-- [ ] 01-02-PLAN.md — Collectors and scheduler: RSS/API/scrape collectors with APScheduler automation
-- [ ] 01-03-PLAN.md — Signal processing and health: normalization, deduplication, Slack health alerts
+- [x] 01-01-PLAN.md — Project foundation: package setup, Pydantic models, source registry, SQLite database, repositories
+- [x] 01-02-PLAN.md — Collectors and scheduler: RSS/API/scrape collectors with APScheduler automation
+- [x] 01-03-PLAN.md — Signal processing and health: normalization, deduplication, Slack health alerts
 
 ### Phase 2: Scoring and Slack Review
 **Goal**: Lauren receives a curated, scored review queue in Slack and can approve, reject, or snooze each signal card
@@ -50,8 +50,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Scoring engine: Claude Haiku structured output scoring, rubric YAML config, DB migration, daily cap logic
-- [ ] 02-02-PLAN.md — Slack review interface: Bolt app, Block Kit cards, approve/reject/snooze actions, delivery job, /watchman slash command
+- [x] 02-01-PLAN.md — Scoring engine: Claude Haiku structured output scoring, rubric YAML config, DB migration, daily cap logic
+- [x] 02-02-PLAN.md — Slack review interface: Bolt app, Block Kit cards, approve/reject/snooze actions, delivery job, /watchman slash command
 
 ### Phase 3: Enrichment Pipeline
 **Goal**: Approved signals are automatically enriched with capabilities, pricing, API surface, and integration details, producing draft tool entries
@@ -86,7 +86,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Collection Pipeline | 0/3 | Not started | - |
-| 2. Scoring and Slack Review | 1/2 | In Progress|  |
+| 1. Collection Pipeline | 3/3 | Complete | 2026-02-24 |
+| 2. Scoring and Slack Review | 2/2 | Complete | 2026-02-24 |
 | 3. Enrichment Pipeline | 0/1 | Not started | - |
 | 4. Gate 2 and Output | 0/1 | Not started | - |
