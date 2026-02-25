@@ -1,7 +1,7 @@
 """Claude Sonnet-based structured extraction for enrichment."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 import anthropic
 
@@ -115,5 +115,5 @@ async def enrich_card(
         api_surface=entry.api_surface,
         integration_hooks=entry.integration_hooks,
         source_url=card_url,
-        discovered_at=datetime.utcnow(),
+        discovered_at=datetime.now(timezone.utc),
     )

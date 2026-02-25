@@ -95,7 +95,7 @@ None - plan executed exactly as written
 None
 
 ## User Setup Required
-None - no external service configuration required (uses existing ANTHROPIC_API_KEY)
+None - no external service configuration required (uses existing OPENROUTER_API_KEY)
 
 ## Next Phase Readiness
 - Enrichment module ready for wiring into Slack approve action (Plan 02)

@@ -3,7 +3,7 @@
 All queries use parameterized statements to prevent SQL injection.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import aiosqlite
 
@@ -367,7 +367,7 @@ class CardRepository:
             card_id: ID of the card to snooze.
             days: Number of days to snooze for (default 30).
         """
-        snooze_until = (datetime.utcnow() + timedelta(days=days)).isoformat()
+        snooze_until = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
         await self.db.execute(
             """UPDATE cards
                SET review_state = 'snoozed',

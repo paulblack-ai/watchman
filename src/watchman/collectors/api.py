@@ -2,7 +2,7 @@
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 import httpx
 
@@ -35,7 +35,7 @@ class APICollector(BaseCollector):
             response.raise_for_status()
 
         data = response.json()
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         # Hacker News Algolia API format
         if "hn.algolia.com" in url:

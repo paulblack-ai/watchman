@@ -82,7 +82,7 @@ None - plan executed exactly as written
 None
 
 ## User Setup Required
-None - uses existing ANTHROPIC_API_KEY environment variable
+None - uses existing OPENROUTER_API_KEY environment variable
 
 ## Next Phase Readiness
 - Enrichment pipeline fully operational

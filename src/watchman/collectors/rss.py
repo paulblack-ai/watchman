@@ -2,7 +2,7 @@
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from time import mktime
 
 import feedparser
@@ -48,7 +48,7 @@ class RSSCollector(BaseCollector):
             return []
 
         items: list[RawItem] = []
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         for entry in feed.entries:
             published_date = self._parse_date(entry, now)

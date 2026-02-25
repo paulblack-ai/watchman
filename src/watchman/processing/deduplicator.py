@@ -1,7 +1,7 @@
 """Two-layer signal deduplication: URL hash + content fingerprint."""
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
 from watchman.models.signal_card import SignalCard
@@ -60,7 +60,7 @@ async def is_duplicate(
     if len(card.title.strip()) < MIN_TITLE_LENGTH_FOR_FUZZY:
         return False, None
 
-    cutoff = datetime.utcnow() - timedelta(days=DEDUP_WINDOW_DAYS)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=DEDUP_WINDOW_DAYS)
     recent_cards = await repo.find_since(cutoff)
 
     for recent in recent_cards:

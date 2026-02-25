@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -200,7 +200,7 @@ async def test_enrich_approved_card_handles_scrape_failure(tmp_db: Path, sample_
         description="An AI platform",
         capabilities=["code generation"],
         source_url="https://testai.example.com",
-        discovered_at=datetime.utcnow(),
+        discovered_at=datetime.now(timezone.utc),
     )
 
     with (
@@ -232,7 +232,7 @@ async def test_enrichment_state_tracking(tmp_db: Path, sample_card: SignalCard):
         description="An AI platform",
         capabilities=["code generation"],
         source_url="https://testai.example.com",
-        discovered_at=datetime.utcnow(),
+        discovered_at=datetime.now(timezone.utc),
     )
 
     with (

@@ -2,7 +2,7 @@
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 import httpx
 import trafilatura
@@ -29,7 +29,7 @@ class ScrapeCollector(BaseCollector):
             List containing a single RawItem from the page, or empty list on failure.
         """
         url = str(self.source.url)
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         # Fetch HTML with httpx (explicit timeout to avoid hangs)
         async with httpx.AsyncClient(

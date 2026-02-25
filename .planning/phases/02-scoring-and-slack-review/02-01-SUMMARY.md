@@ -136,7 +136,7 @@ Each task was committed atomically:
 
 ## User Setup Required
 
-None - no external service configuration required for scoring engine itself. Note: `ANTHROPIC_API_KEY` environment variable must be set at runtime for score_card to call the API.
+None - no external service configuration required for scoring engine itself. Note: `OPENROUTER_API_KEY` environment variable must be set at runtime for score_card to call the API.
 
 ## Next Phase Readiness
 
