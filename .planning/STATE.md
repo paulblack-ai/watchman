@@ -87,9 +87,10 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 1 | Switch LLM calls to OpenRouter | 2026-02-25 | 76f9351 | [1-switch-to-openrouter](./quick/1-switch-to-openrouter/) |
+| 2 | Clean up code pull (last 2 weeks releases) | 2026-02-25 | 7d1501f | [2-clean-up-code-pull-last-2-weeks-releases](./quick/2-clean-up-code-pull-last-2-weeks-releases/) |
 
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Human verification complete (7/7), ready for /gsd:complete-milestone v1.0
+Stopped at: Completed quick task 2 (DB reset + 2-week collection)
 Resume file: .planning/phases/07-audit-gap-closure-runtime-fixes/.continue-here.md
