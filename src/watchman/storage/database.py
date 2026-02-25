@@ -7,6 +7,45 @@ from typing import AsyncGenerator
 import aiosqlite
 
 
+async def migrate_phase2(db_path: Path) -> None:
+    """Apply Phase 2 schema migration: add score and review columns to cards.
+
+    This migration is idempotent — running it multiple times is safe.
+    Each ALTER TABLE is wrapped in try/except to handle duplicate column errors.
+
+    Args:
+        db_path: Path to the SQLite database file.
+    """
+    new_columns = [
+        "ALTER TABLE cards ADD COLUMN relevance_score REAL",
+        "ALTER TABLE cards ADD COLUMN score_breakdown TEXT",
+        "ALTER TABLE cards ADD COLUMN top_dimension TEXT",
+        "ALTER TABLE cards ADD COLUMN review_state TEXT DEFAULT 'pending' CHECK(review_state IN ('pending', 'approved', 'rejected', 'snoozed'))",
+        "ALTER TABLE cards ADD COLUMN reviewed_at TEXT",
+        "ALTER TABLE cards ADD COLUMN snooze_until TEXT",
+        "ALTER TABLE cards ADD COLUMN slack_message_ts TEXT",
+        "ALTER TABLE cards ADD COLUMN slack_channel_id TEXT",
+    ]
+
+    new_indexes = [
+        "CREATE INDEX IF NOT EXISTS idx_cards_review_state ON cards(review_state)",
+        "CREATE INDEX IF NOT EXISTS idx_cards_snooze_until ON cards(snooze_until)",
+    ]
+
+    async with aiosqlite.connect(str(db_path)) as db:
+        for statement in new_columns:
+            try:
+                await db.execute(statement)
+            except Exception:
+                # Column already exists — migration is idempotent
+                pass
+
+        for statement in new_indexes:
+            await db.execute(statement)
+
+        await db.commit()
+
+
 async def init_db(db_path: Path) -> None:
     """Initialize the SQLite database with all tables and indexes.
 
@@ -85,6 +124,9 @@ async def init_db(db_path: Path) -> None:
         )
 
         await db.commit()
+
+    # Apply Phase 2 schema migration (idempotent)
+    await migrate_phase2(db_path)
 
 
 @asynccontextmanager

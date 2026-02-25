@@ -3,12 +3,13 @@
 All queries use parameterized statements to prevent SQL injection.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import aiosqlite
 
 from watchman.models.raw_item import RawItem
 from watchman.models.signal_card import SignalCard
+from watchman.scoring.models import RubricScore
 
 
 class RawItemRepository:
@@ -183,9 +184,152 @@ class CardRepository:
         )
         await self.db.commit()
 
+    async def save_score(self, card_id: int, score: RubricScore) -> None:
+        """Persist a rubric score for a signal card.
+
+        Args:
+            card_id: ID of the card to update.
+            score: RubricScore with composite score, per-dimension scores, and top dimension.
+        """
+        await self.db.execute(
+            """UPDATE cards
+               SET relevance_score = ?,
+                   score_breakdown = ?,
+                   top_dimension = ?
+               WHERE id = ?""",
+            (
+                score.composite_score,
+                score.model_dump_json(),
+                score.top_dimension,
+                card_id,
+            ),
+        )
+        await self.db.commit()
+
+    async def find_unscored(self) -> list[SignalCard]:
+        """Find all non-duplicate cards that have not been scored yet.
+
+        Returns:
+            List of SignalCard instances without a relevance_score.
+        """
+        async with self.db.execute(
+            """SELECT * FROM cards
+               WHERE relevance_score IS NULL
+               AND duplicate_of IS NULL
+               ORDER BY created_at ASC"""
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [self._row_to_card(row) for row in rows]
+
+    async def find_top_scored_today(self, limit: int) -> list[SignalCard]:
+        """Find the top-scored pending cards for today's review digest.
+
+        Includes:
+        - Cards created today with pending review state and a score
+        - Snoozed cards whose snooze_until has passed
+
+        Results are ordered by relevance_score DESC, tier ASC (lower tier = higher quality).
+
+        Args:
+            limit: Maximum number of cards to return.
+
+        Returns:
+            List of SignalCard instances ordered by score.
+        """
+        async with self.db.execute(
+            """SELECT * FROM cards
+               WHERE relevance_score IS NOT NULL
+               AND (
+                   (review_state = 'pending'
+                    AND date(created_at) = date('now'))
+                   OR
+                   (review_state = 'snoozed'
+                    AND snooze_until <= datetime('now'))
+               )
+               ORDER BY relevance_score DESC, tier ASC
+               LIMIT ?""",
+            (limit,),
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [self._row_to_card(row) for row in rows]
+
+    async def count_scored_today(self) -> int:
+        """Count all scored cards created today.
+
+        Used for the "Showing X of Y" footer in the digest.
+
+        Returns:
+            Count of scored cards from today.
+        """
+        async with self.db.execute(
+            """SELECT COUNT(*) FROM cards
+               WHERE relevance_score IS NOT NULL
+               AND date(created_at) = date('now')"""
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row[0] if row else 0
+
+    async def set_review_state(
+        self,
+        card_id: int,
+        state: str,
+        slack_ts: str | None = None,
+        slack_channel: str | None = None,
+    ) -> None:
+        """Update the review state of a card.
+
+        Args:
+            card_id: ID of the card to update.
+            state: New review state (pending/approved/rejected/snoozed).
+            slack_ts: Slack message timestamp, if applicable.
+            slack_channel: Slack channel ID, if applicable.
+        """
+        await self.db.execute(
+            """UPDATE cards
+               SET review_state = ?,
+                   reviewed_at = datetime('now'),
+                   slack_message_ts = COALESCE(?, slack_message_ts),
+                   slack_channel_id = COALESCE(?, slack_channel_id)
+               WHERE id = ?""",
+            (state, slack_ts, slack_channel, card_id),
+        )
+        await self.db.commit()
+
+    async def snooze_card(self, card_id: int, days: int = 30) -> None:
+        """Snooze a card for a given number of days.
+
+        Sets review_state to 'snoozed' and snooze_until to now + days.
+
+        Args:
+            card_id: ID of the card to snooze.
+            days: Number of days to snooze for (default 30).
+        """
+        snooze_until = (datetime.utcnow() + timedelta(days=days)).isoformat()
+        await self.db.execute(
+            """UPDATE cards
+               SET review_state = 'snoozed',
+                   snooze_until = ?
+               WHERE id = ?""",
+            (snooze_until, card_id),
+        )
+        await self.db.commit()
+
     @staticmethod
     def _row_to_card(row: aiosqlite.Row) -> SignalCard:
-        """Convert a database row to a SignalCard instance."""
+        """Convert a database row to a SignalCard instance.
+
+        Handles both old rows (missing Phase 2 columns) and new rows gracefully.
+        """
+        # Helper to safely get optional columns
+        def safe_get(key: str, default=None):
+            try:
+                return row[key]
+            except (IndexError, KeyError):
+                return default
+
+        reviewed_at_raw = safe_get("reviewed_at")
+        snooze_until_raw = safe_get("snooze_until")
+
         return SignalCard(
             id=row["id"],
             title=row["title"],
@@ -200,6 +344,19 @@ class CardRepository:
             duplicate_of=row["duplicate_of"],
             seen_count=row["seen_count"],
             created_at=datetime.fromisoformat(row["created_at"]),
+            # Phase 2 fields
+            relevance_score=safe_get("relevance_score"),
+            score_breakdown=safe_get("score_breakdown"),
+            top_dimension=safe_get("top_dimension"),
+            review_state=safe_get("review_state") or "pending",
+            reviewed_at=(
+                datetime.fromisoformat(reviewed_at_raw) if reviewed_at_raw else None
+            ),
+            snooze_until=(
+                datetime.fromisoformat(snooze_until_raw) if snooze_until_raw else None
+            ),
+            slack_message_ts=safe_get("slack_message_ts"),
+            slack_channel_id=safe_get("slack_channel_id"),
         )
 
 

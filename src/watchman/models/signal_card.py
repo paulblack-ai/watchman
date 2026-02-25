@@ -28,6 +28,18 @@ class SignalCard(BaseModel):
     seen_count: int = 1
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+    # Phase 2: scoring fields
+    relevance_score: float | None = None
+    score_breakdown: str | None = None  # JSON string
+    top_dimension: str | None = None
+
+    # Phase 2: review workflow fields
+    review_state: str = "pending"
+    reviewed_at: datetime | None = None
+    snooze_until: datetime | None = None
+    slack_message_ts: str | None = None
+    slack_channel_id: str | None = None
+
     @staticmethod
     def compute_url_hash(url: str) -> str:
         """Compute SHA-256 hash of normalized URL for exact deduplication."""

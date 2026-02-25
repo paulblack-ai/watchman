@@ -1,0 +1,35 @@
+dimensions:
+  taxonomy_fit:
+    weight: 0.35
+    description: >
+      How well the signal fits IcebreakerAI's taxonomy of AI tools and capabilities.
+      Score higher when the item is directly about an AI tool, model, API, or integration
+      that belongs in the IcebreakerAI registry. Score lower for tangential or general AI news.
+
+  novel_capability:
+    weight: 0.30
+    description: >
+      Whether this represents a genuinely new capability or significant advancement.
+      Score higher for first-of-kind features, major version releases with new functionality,
+      or breakthrough techniques. Score lower for minor updates, bug fixes, or restatements.
+
+  adoption_traction:
+    weight: 0.20
+    description: >
+      Evidence of real-world adoption, usage, or traction in the market.
+      Score higher when there are concrete numbers (users, downloads, integrations),
+      enterprise adoption, or strong community engagement. Score lower for vaporware
+      or early-stage announcements without validation.
+
+  credibility:
+    weight: 0.15
+    description: >
+      Credibility of the source and accuracy of the information.
+      Score higher for official announcements, peer-reviewed research, Tier 1 sources
+      (direct from the company/authors). Score lower for third-party summaries,
+      speculative posts, or unknown sources.
+
+score_scale: 10
+daily_cap_min: 3
+daily_cap_max: 7
+daily_cap_target: 5
