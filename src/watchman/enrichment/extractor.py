@@ -91,20 +91,17 @@ async def enrich_card(
     prompt = _build_enrichment_prompt(card_title, card_url, card_summary, page_content)
 
     response = client.messages.create(
-        model="anthropic/claude-sonnet-4-20250514",
+        model="anthropic/claude-sonnet-4",
         max_tokens=1024,
         messages=[{"role": "user", "content": prompt}],
-        betas=["output-128k-2025-02-19"],
-        output_config={
-            "format": {
-                "type": "json_schema",
-                "name": "icebreaker_tool_entry",
-                "schema": IcebreakerToolEntry.model_json_schema(),
-            }
-        },
     )
 
-    entry = IcebreakerToolEntry.model_validate_json(response.content[0].text)
+    # Extract JSON from response text (may be wrapped in markdown code fences)
+    text = response.content[0].text.strip()
+    if text.startswith("```"):
+        lines = text.split("\n")
+        text = "\n".join(lines[1:-1]).strip()
+    entry = IcebreakerToolEntry.model_validate_json(text)
 
     # Overwrite source_url and discovered_at with known-accurate values
     return IcebreakerToolEntry(

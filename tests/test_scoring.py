@@ -213,7 +213,7 @@ async def test_score_card_returns_rubric_score(
 async def test_score_card_uses_correct_model(
     sample_card: SignalCard, rubric: RubricConfig, sample_rubric_score: RubricScore
 ) -> None:
-    """score_card should use claude-haiku-4-5-20251001 model."""
+    """score_card should use claude-haiku-4.5 model via OpenRouter."""
     mock_response = MagicMock()
     mock_response.content = [MagicMock(text=sample_rubric_score.model_dump_json())]
 
@@ -225,14 +225,14 @@ async def test_score_card_uses_correct_model(
         await score_card(sample_card, rubric)
 
         call_kwargs = mock_client.messages.create.call_args
-        assert call_kwargs.kwargs["model"] == "anthropic/claude-haiku-4-5-20251001"
+        assert call_kwargs.kwargs["model"] == "anthropic/claude-haiku-4.5"
 
 
 @pytest.mark.integration
-async def test_score_card_uses_structured_output(
+async def test_score_card_sends_prompt(
     sample_card: SignalCard, rubric: RubricConfig, sample_rubric_score: RubricScore
 ) -> None:
-    """score_card should pass output_config with json_schema format."""
+    """score_card should send messages with user prompt."""
     mock_response = MagicMock()
     mock_response.content = [MagicMock(text=sample_rubric_score.model_dump_json())]
 
@@ -244,5 +244,6 @@ async def test_score_card_uses_structured_output(
         await score_card(sample_card, rubric)
 
         call_kwargs = mock_client.messages.create.call_args
-        output_config = call_kwargs.kwargs["output_config"]
-        assert output_config["format"]["type"] == "json_schema"
+        messages = call_kwargs.kwargs["messages"]
+        assert len(messages) == 1
+        assert messages[0]["role"] == "user"

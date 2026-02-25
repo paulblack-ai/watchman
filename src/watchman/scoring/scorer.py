@@ -73,20 +73,18 @@ async def score_card(card: SignalCard, rubric: RubricConfig) -> RubricScore:
     prompt = _build_scoring_prompt(card, rubric)
 
     response = client.messages.create(
-        model="anthropic/claude-haiku-4-5-20251001",
+        model="anthropic/claude-haiku-4.5",
         max_tokens=512,
         messages=[{"role": "user", "content": prompt}],
-        betas=["output-128k-2025-02-19"],
-        output_config={
-            "format": {
-                "type": "json_schema",
-                "name": "rubric_score",
-                "schema": RubricScore.model_json_schema(),
-            }
-        },
     )
 
-    return RubricScore.model_validate_json(response.content[0].text)
+    # Extract JSON from response text (may be wrapped in markdown code fences)
+    text = response.content[0].text.strip()
+    if text.startswith("```"):
+        # Strip markdown code fences
+        lines = text.split("\n")
+        text = "\n".join(lines[1:-1]).strip()
+    return RubricScore.model_validate_json(text)
 
 
 async def score_unscored_cards(db_path: Path, rubric_path: Path) -> int:
