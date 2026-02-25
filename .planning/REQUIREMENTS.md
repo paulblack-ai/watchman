@@ -12,20 +12,20 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SRC-01**: System loads sources from a YAML config file with type (rss/api/scrape), URL, tier (1/2/3), and scan frequency per source
 - [x] **SRC-02**: Adding a new source requires only a new YAML entry, zero code changes
 - [x] **SRC-03**: System includes 15-20 starter sources across Tier 1 (structured/official), Tier 2 (launch platforms), and Tier 3 (SaaS changelogs)
-- [ ] **SRC-04**: System monitors per-source health and alerts via Slack when a source yields zero results for 2+ consecutive runs
+- [x] **SRC-04**: System monitors per-source health and alerts via Slack when a source yields zero results for 2+ consecutive runs
 
 ### Collection
 
-- [ ] **COLL-01**: System runs scheduled collectors on per-source cron frequencies using APScheduler
-- [ ] **COLL-02**: RSS collector parses RSS/Atom feeds and writes raw items to the database
-- [ ] **COLL-03**: HTTP/API collector fetches structured API responses and writes raw items to the database
-- [ ] **COLL-04**: Scrape collector extracts article content from web pages and writes raw items to the database
+- [x] **COLL-01**: System runs scheduled collectors on per-source cron frequencies using APScheduler
+- [x] **COLL-02**: RSS collector parses RSS/Atom feeds and writes raw items to the database
+- [x] **COLL-03**: HTTP/API collector fetches structured API responses and writes raw items to the database
+- [x] **COLL-04**: Scrape collector extracts article content from web pages and writes raw items to the database
 
 ### Signal Processing
 
-- [ ] **PROC-01**: System normalizes raw items into structured signal cards (title, source, date, summary, URL, tier)
-- [ ] **PROC-02**: System deduplicates signals by URL hash before scoring
-- [ ] **PROC-03**: System deduplicates signals by content fingerprint (normalized title + date) to catch cross-source duplicates
+- [x] **PROC-01**: System normalizes raw items into structured signal cards (title, source, date, summary, URL, tier)
+- [x] **PROC-02**: System deduplicates signals by URL hash before scoring
+- [x] **PROC-03**: System deduplicates signals by content fingerprint (normalized title + date) to catch cross-source duplicates
 - [ ] **PROC-04**: System scores signals against IcebreakerAI relevance rubric (taxonomy fit, novel capability, adoption/traction, credibility) using Claude Haiku
 - [ ] **PROC-05**: System enforces a daily volume cap (3-7 cards) to prevent signal fatigue
 - [ ] **PROC-06**: System persists score breakdown per signal for future calibration
@@ -53,7 +53,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **INFRA-01**: SQLite database serves as integration bus between pipeline stages
 - [x] **INFRA-02**: IcebreakerAI tool registry schema is obtained and encoded as Pydantic models before enrichment code is written
-- [ ] **INFRA-03**: System runs as a single-process cron agent on Paul's machine or AWS instance
+- [x] **INFRA-03**: System runs as a single-process cron agent on Paul's machine or AWS instance
 
 ## v2 Requirements
 
@@ -92,14 +92,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SRC-01 | Phase 1 | Complete |
 | SRC-02 | Phase 1 | Complete |
 | SRC-03 | Phase 1 | Complete |
-| SRC-04 | Phase 1 | Pending |
-| COLL-01 | Phase 1 | Pending |
-| COLL-02 | Phase 1 | Pending |
-| COLL-03 | Phase 1 | Pending |
-| COLL-04 | Phase 1 | Pending |
-| PROC-01 | Phase 1 | Pending |
-| PROC-02 | Phase 1 | Pending |
-| PROC-03 | Phase 1 | Pending |
+| SRC-04 | Phase 1 | Complete |
+| COLL-01 | Phase 1 | Complete |
+| COLL-02 | Phase 1 | Complete |
+| COLL-03 | Phase 1 | Complete |
+| COLL-04 | Phase 1 | Complete |
+| PROC-01 | Phase 1 | Complete |
+| PROC-02 | Phase 1 | Complete |
+| PROC-03 | Phase 1 | Complete |
 | PROC-04 | Phase 2 | Pending |
 | PROC-05 | Phase 2 | Pending |
 | PROC-06 | Phase 2 | Pending |
@@ -115,7 +115,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OUT-03 | Phase 4 | Pending |
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 1 | Complete |
-| INFRA-03 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 27 total
