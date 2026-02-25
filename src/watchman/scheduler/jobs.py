@@ -8,7 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
-from watchman.collectors.base import get_collector
+from watchman.collectors import get_collector
 from watchman.config.loader import parse_interval
 from watchman.health.tracker import record_collection_result
 from watchman.models.source import SourceConfig

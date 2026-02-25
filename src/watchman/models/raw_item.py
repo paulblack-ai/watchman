@@ -1,6 +1,6 @@
 """Raw item model for unprocessed feed entries."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -20,6 +20,6 @@ class RawItem(BaseModel):
     url: str | None = None
     summary: str | None = None
     published_date: datetime | None = None
-    fetched_at: datetime = Field(default_factory=datetime.utcnow)
+    fetched_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     raw_data: str | None = None
     processed: bool = False

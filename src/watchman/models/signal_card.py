@@ -1,7 +1,7 @@
 """Signal card model for normalized, deduplicated signals."""
 
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -26,7 +26,7 @@ class SignalCard(BaseModel):
     content_fingerprint: str | None = None
     duplicate_of: int | None = None
     seen_count: int = 1
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     # Phase 2: scoring fields
     relevance_score: float | None = None

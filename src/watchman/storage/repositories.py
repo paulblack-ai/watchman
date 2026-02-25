@@ -446,19 +446,33 @@ class CardRepository:
     ) -> None:
         """Update the Gate 2 review state of a card.
 
+        When state is 'pending' (initial delivery to Slack), only gate2_state
+        and gate2_slack_ts are updated — gate2_reviewed_at stays NULL.
+        When state is 'gate2_approved' or 'gate2_rejected' (actual review),
+        gate2_reviewed_at is also set to the current time.
+
         Args:
             card_id: ID of the card to update.
             state: New Gate 2 state (pending/gate2_approved/gate2_rejected).
             slack_ts: Slack message timestamp, if applicable.
         """
-        await self.db.execute(
-            """UPDATE cards
-               SET gate2_state = ?,
-                   gate2_reviewed_at = datetime('now'),
-                   gate2_slack_ts = COALESCE(?, gate2_slack_ts)
-               WHERE id = ?""",
-            (state, slack_ts, card_id),
-        )
+        if state == "pending":
+            await self.db.execute(
+                """UPDATE cards
+                   SET gate2_state = ?,
+                       gate2_slack_ts = COALESCE(?, gate2_slack_ts)
+                   WHERE id = ?""",
+                (state, slack_ts, card_id),
+            )
+        else:
+            await self.db.execute(
+                """UPDATE cards
+                   SET gate2_state = ?,
+                       gate2_reviewed_at = datetime('now'),
+                       gate2_slack_ts = COALESCE(?, gate2_slack_ts)
+                   WHERE id = ?""",
+                (state, slack_ts, card_id),
+            )
         await self.db.commit()
 
     async def save_output_path(self, card_id: int, path: str) -> None:
