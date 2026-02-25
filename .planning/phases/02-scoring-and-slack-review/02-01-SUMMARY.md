@@ -148,3 +148,14 @@ None - no external service configuration required for scoring engine itself. Not
 ---
 *Phase: 02-scoring-and-slack-review*
 *Completed: 2026-02-25*
+
+## Self-Check: PASSED
+
+- FOUND: src/watchman/scoring/scorer.py
+- FOUND: src/watchman/scoring/models.py
+- FOUND: src/watchman/scoring/rubric.py
+- FOUND: src/watchman/config/rubric.yaml
+- FOUND: tests/test_scoring.py
+- FOUND: .planning/phases/02-scoring-and-slack-review/02-01-SUMMARY.md
+- FOUND commit: c8f35b0 (Task 1)
+- FOUND commit: 61af866 (Task 2)
