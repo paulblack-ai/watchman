@@ -4,7 +4,10 @@ Placeholder schema -- update when real IcebreakerAI registry schema is obtained 
 These models define the expected structure of tool entries for the IcebreakerAI platform.
 """
 
+from __future__ import annotations
+
 from datetime import datetime
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -18,9 +21,9 @@ class IcebreakerToolEntry(BaseModel):
 
     name: str
     description: str
-    capabilities: list[str]
-    pricing: str | None = None
-    api_surface: str | None = None
-    integration_hooks: list[str] = []
-    source_url: str | None = None
-    discovered_at: datetime | None = None
+    capabilities: List[str]
+    pricing: Optional[str] = None
+    api_surface: Optional[str] = None
+    integration_hooks: List[str] = []
+    source_url: Optional[str] = None
+    discovered_at: Optional[datetime] = None

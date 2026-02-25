@@ -1,4 +1,5 @@
 """Slack DM alerting for source health issues."""
+from __future__ import annotations
 
 import logging
 

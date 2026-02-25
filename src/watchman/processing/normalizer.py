@@ -1,4 +1,5 @@
 """Raw item to signal card normalization with LLM-powered changelog splitting."""
+from __future__ import annotations
 
 import asyncio
 import json

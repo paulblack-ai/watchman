@@ -1,4 +1,5 @@
 """Block Kit builder functions for Slack signal card messages."""
+from __future__ import annotations
 
 from watchman.models.icebreaker import IcebreakerToolEntry
 from watchman.models.signal_card import SignalCard

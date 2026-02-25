@@ -1,4 +1,5 @@
 """HTTP/API collector for structured API endpoints."""
+from __future__ import annotations
 
 import json
 import logging

@@ -1,4 +1,5 @@
 """Rubric configuration loader for scoring dimensions and weights."""
+from __future__ import annotations
 
 from pathlib import Path
 

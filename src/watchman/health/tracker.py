@@ -1,4 +1,5 @@
 """Per-source health tracking with consecutive zero detection."""
+from __future__ import annotations
 
 import logging
 import os

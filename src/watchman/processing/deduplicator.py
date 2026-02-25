@@ -1,4 +1,6 @@
 """Two-layer signal deduplication: URL hash + content fingerprint."""
+from __future__ import annotations
+
 
 import logging
 from datetime import datetime, timedelta, timezone

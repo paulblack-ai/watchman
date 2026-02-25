@@ -1,4 +1,5 @@
 """Configuration loading for the Watchman source registry."""
+from __future__ import annotations
 
 import re
 from pathlib import Path

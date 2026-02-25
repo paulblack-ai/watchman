@@ -1,4 +1,5 @@
 """Web scrape collector using trafilatura for content extraction."""
+from __future__ import annotations
 
 import json
 import logging

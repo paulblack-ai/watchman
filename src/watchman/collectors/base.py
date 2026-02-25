@@ -1,4 +1,5 @@
 """Abstract base collector and factory registry."""
+from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod

@@ -2,6 +2,7 @@
 
 All queries use parameterized statements to prevent SQL injection.
 """
+from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 

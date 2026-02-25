@@ -1,4 +1,6 @@
 """Web page content extraction using httpx and trafilatura."""
+from __future__ import annotations
+
 
 import logging
 

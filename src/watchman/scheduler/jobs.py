@@ -1,4 +1,5 @@
 """APScheduler job definitions for automated collection."""
+from __future__ import annotations
 
 import asyncio
 import logging

@@ -1,4 +1,6 @@
 """Enrichment pipeline: scrape, extract, validate, and store tool entries."""
+from __future__ import annotations
+
 
 import asyncio
 import logging

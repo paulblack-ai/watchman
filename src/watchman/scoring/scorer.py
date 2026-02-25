@@ -1,4 +1,6 @@
 """Claude Haiku-based relevance scorer for signal cards."""
+from __future__ import annotations
+
 
 import asyncio
 import logging
