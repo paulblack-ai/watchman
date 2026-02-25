@@ -110,9 +110,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ENRCH-01 | Phase 3 | Complete |
 | ENRCH-02 | Phase 3 | Complete |
 | ENRCH-03 | Phase 3 | Complete |
-| OUT-01 | Phase 4 | Pending |
-| OUT-02 | Phase 4 | Pending |
-| OUT-03 | Phase 4 | Pending |
+| OUT-01 | Phase 4 | Complete |
+| OUT-02 | Phase 4 | Complete |
+| OUT-03 | Phase 4 | Complete |
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Complete |
