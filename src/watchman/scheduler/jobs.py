@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
 from watchman.collectors.base import get_collector
@@ -91,6 +92,31 @@ def schedule_scoring_job(
         replace_existing=True,
     )
     logger.info("Scheduled scoring job every 30 minutes")
+
+
+def schedule_delivery_job(
+    scheduler: BackgroundScheduler, db_path: Path, rubric_path: Path
+) -> None:
+    """Register a daily 9 AM delivery job with the scheduler.
+
+    The job calls deliver_daily_review_sync which posts the top-scored
+    signal cards to the configured Slack channel.
+
+    Args:
+        scheduler: The APScheduler BackgroundScheduler to add the job to.
+        db_path: Path to the SQLite database.
+        rubric_path: Path to the rubric YAML config.
+    """
+    from watchman.slack.delivery import deliver_daily_review_sync  # noqa: PLC0415
+
+    scheduler.add_job(
+        deliver_daily_review_sync,
+        trigger=CronTrigger(hour=9, minute=0),
+        args=[db_path, rubric_path],
+        id="deliver-daily-review",
+        replace_existing=True,
+    )
+    logger.info("Scheduled daily review delivery job at 09:00 AM")
 
 
 def setup_scheduler(
