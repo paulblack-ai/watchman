@@ -1,7 +1,8 @@
-"""Watchman entry point: loads config, inits DB, starts scheduler."""
+"""Watchman entry point: loads config, inits DB, starts Slack, and starts scheduler."""
 
 import asyncio
 import logging
+import os
 import time
 from pathlib import Path
 
@@ -12,8 +13,13 @@ from watchman.storage.database import init_db
 def main() -> None:
     """Start the Watchman signal collection agent.
 
-    Loads source configuration, initializes the database, sets up
-    the scheduler, and runs until interrupted with Ctrl+C.
+    Loads source configuration, initializes the database, optionally starts
+    the Slack Socket Mode listener (when tokens are configured), sets up the
+    scheduler with collection, scoring, and delivery jobs, and runs until
+    interrupted with Ctrl+C.
+
+    Graceful degradation: if SLACK_BOT_TOKEN or SLACK_APP_TOKEN are missing,
+    Slack features are disabled but all other functionality continues normally.
     """
     # Configure logging
     logging.basicConfig(
@@ -26,6 +32,7 @@ def main() -> None:
     # Determine paths
     db_path = Path("watchman.db")
     config_path = Path("src/watchman/config/sources.yaml")
+    rubric_path = Path("src/watchman/config/rubric.yaml")
 
     # Load source registry
     logger.info("Loading source registry from %s", config_path)
@@ -50,11 +57,38 @@ def main() -> None:
     logger.info("Initializing database at %s", db_path)
     asyncio.run(init_db(db_path))
 
-    # Import here to avoid circular imports (scheduler imports health which imports storage)
-    from watchman.scheduler.jobs import setup_scheduler
+    # Slack integration (graceful degradation when tokens are missing)
+    slack_token = os.environ.get("SLACK_BOT_TOKEN")
+    slack_app_token = os.environ.get("SLACK_APP_TOKEN")
+    slack_enabled = bool(slack_token and slack_app_token)
 
-    # Set up and start scheduler
-    scheduler = setup_scheduler(enabled_sources, db_path)
+    if slack_enabled:
+        # Import here to avoid import-time side effects when Slack is not configured
+        from watchman.slack.app import create_slack_app, start_socket_mode  # noqa: PLC0415
+
+        slack_app = create_slack_app()
+        start_socket_mode(slack_app)
+        logger.info("Slack listener started")
+    else:
+        logger.warning(
+            "SLACK_BOT_TOKEN/SLACK_APP_TOKEN not set, Slack features disabled"
+        )
+        slack_app = None
+
+    # Import scheduler after DB init to avoid circular imports
+    from watchman.scheduler.jobs import (  # noqa: PLC0415
+        schedule_delivery_job,
+        schedule_scoring_job,
+        setup_scheduler,
+    )
+
+    # Set up scheduler with collection jobs and scoring job
+    scheduler = setup_scheduler(enabled_sources, db_path, rubric_path)
+
+    # Add daily delivery job only when Slack is configured
+    if slack_enabled:
+        schedule_delivery_job(scheduler, db_path, rubric_path)
+
     scheduler.start()
 
     logger.info(
