@@ -47,11 +47,11 @@ Plans:
   4. Snoozed cards re-appear in the queue after 30 days
 **Notes**:
   - Phase 2 should include a `/watchman add-source` slash command so Lauren can add sources directly from Slack (DEC-008)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Scoring engine: Claude Haiku structured output scoring, rubric YAML config, DB migration, daily cap logic
+- [ ] 02-02-PLAN.md — Slack review interface: Bolt app, Block Kit cards, approve/reject/snooze actions, delivery job, /watchman slash command
 
 ### Phase 3: Enrichment Pipeline
 **Goal**: Approved signals are automatically enriched with capabilities, pricing, API surface, and integration details, producing draft tool entries
