@@ -46,6 +46,13 @@ class SignalCard(BaseModel):
     enrichment_error: str | None = None
     enriched_at: datetime | None = None
 
+    # Phase 4: Gate 2 and output fields
+    gate2_state: str = "pending"
+    gate2_reviewed_at: datetime | None = None
+    gate2_slack_ts: str | None = None
+    enrichment_attempt_count: int = 1
+    output_path: str | None = None
+
     @staticmethod
     def compute_url_hash(url: str) -> str:
         """Compute SHA-256 hash of normalized URL for exact deduplication."""

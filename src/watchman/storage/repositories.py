@@ -428,7 +428,86 @@ class CardRepository:
             enriched_at=(
                 datetime.fromisoformat(enriched_at_raw) if enriched_at_raw else None
             ),
+            # Phase 4 fields
+            gate2_state=safe_get("gate2_state") or "pending",
+            gate2_reviewed_at=(
+                datetime.fromisoformat(safe_get("gate2_reviewed_at"))
+                if safe_get("gate2_reviewed_at")
+                else None
+            ),
+            gate2_slack_ts=safe_get("gate2_slack_ts"),
+            enrichment_attempt_count=safe_get("enrichment_attempt_count") or 1,
+            output_path=safe_get("output_path"),
         )
+
+
+    async def set_gate2_state(
+        self, card_id: int, state: str, slack_ts: str | None = None
+    ) -> None:
+        """Update the Gate 2 review state of a card.
+
+        Args:
+            card_id: ID of the card to update.
+            state: New Gate 2 state (pending/gate2_approved/gate2_rejected).
+            slack_ts: Slack message timestamp, if applicable.
+        """
+        await self.db.execute(
+            """UPDATE cards
+               SET gate2_state = ?,
+                   gate2_reviewed_at = datetime('now'),
+                   gate2_slack_ts = COALESCE(?, gate2_slack_ts)
+               WHERE id = ?""",
+            (state, slack_ts, card_id),
+        )
+        await self.db.commit()
+
+    async def save_output_path(self, card_id: int, path: str) -> None:
+        """Record the output file path for a Gate 2 approved card.
+
+        Args:
+            card_id: ID of the card to update.
+            path: File path of the written JSON output.
+        """
+        await self.db.execute(
+            "UPDATE cards SET output_path = ? WHERE id = ?",
+            (path, card_id),
+        )
+        await self.db.commit()
+
+    async def increment_enrichment_attempt(self, card_id: int) -> int:
+        """Increment and return the enrichment attempt count for a card.
+
+        Args:
+            card_id: ID of the card to update.
+
+        Returns:
+            Updated enrichment attempt count.
+        """
+        await self.db.execute(
+            "UPDATE cards SET enrichment_attempt_count = enrichment_attempt_count + 1 WHERE id = ?",
+            (card_id,),
+        )
+        await self.db.commit()
+        async with self.db.execute(
+            "SELECT enrichment_attempt_count FROM cards WHERE id = ?", (card_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row[0] if row else 0
+
+    async def find_enriched_pending_gate2(self) -> list[SignalCard]:
+        """Find cards with enrichment complete but not yet reviewed at Gate 2.
+
+        Returns:
+            List of SignalCard instances pending Gate 2 review.
+        """
+        async with self.db.execute(
+            """SELECT * FROM cards
+               WHERE enrichment_state = 'complete'
+               AND gate2_state = 'pending'
+               ORDER BY enriched_at ASC"""
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [self._row_to_card(row) for row in rows]
 
 
 class HealthRepository:

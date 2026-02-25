@@ -131,6 +131,9 @@ async def init_db(db_path: Path) -> None:
     # Apply Phase 3 schema migration (idempotent)
     await migrate_phase3(db_path)
 
+    # Apply Phase 4 schema migration (idempotent)
+    await migrate_phase4(db_path)
+
 
 async def migrate_phase3(db_path: Path) -> None:
     """Apply Phase 3 schema migration: add enrichment columns to cards.
@@ -150,6 +153,41 @@ async def migrate_phase3(db_path: Path) -> None:
 
     new_indexes = [
         "CREATE INDEX IF NOT EXISTS idx_cards_enrichment_state ON cards(enrichment_state)",
+    ]
+
+    async with aiosqlite.connect(str(db_path)) as db:
+        for statement in new_columns:
+            try:
+                await db.execute(statement)
+            except Exception:
+                # Column already exists -- migration is idempotent
+                pass
+
+        for statement in new_indexes:
+            await db.execute(statement)
+
+        await db.commit()
+
+
+async def migrate_phase4(db_path: Path) -> None:
+    """Apply Phase 4 schema migration: add Gate 2 and output columns to cards.
+
+    This migration is idempotent -- running it multiple times is safe.
+    Each ALTER TABLE is wrapped in try/except to handle duplicate column errors.
+
+    Args:
+        db_path: Path to the SQLite database file.
+    """
+    new_columns = [
+        "ALTER TABLE cards ADD COLUMN gate2_state TEXT DEFAULT 'pending' CHECK(gate2_state IN ('pending', 'gate2_approved', 'gate2_rejected'))",
+        "ALTER TABLE cards ADD COLUMN gate2_reviewed_at TEXT",
+        "ALTER TABLE cards ADD COLUMN gate2_slack_ts TEXT",
+        "ALTER TABLE cards ADD COLUMN enrichment_attempt_count INTEGER DEFAULT 1",
+        "ALTER TABLE cards ADD COLUMN output_path TEXT",
+    ]
+
+    new_indexes = [
+        "CREATE INDEX IF NOT EXISTS idx_cards_gate2_state ON cards(gate2_state)",
     ]
 
     async with aiosqlite.connect(str(db_path)) as db:
