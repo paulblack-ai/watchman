@@ -78,12 +78,16 @@ def main() -> None:
     # Import scheduler after DB init to avoid circular imports
     from watchman.scheduler.jobs import (  # noqa: PLC0415
         schedule_delivery_job,
+        schedule_enrichment_job,
         schedule_scoring_job,
         setup_scheduler,
     )
 
     # Set up scheduler with collection jobs and scoring job
     scheduler = setup_scheduler(enabled_sources, db_path, rubric_path)
+
+    # Add enrichment fallback job (runs regardless of Slack)
+    schedule_enrichment_job(scheduler, db_path)
 
     # Add daily delivery job only when Slack is configured
     if slack_enabled:

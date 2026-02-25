@@ -94,6 +94,47 @@ def schedule_scoring_job(
     logger.info("Scheduled scoring job every 30 minutes")
 
 
+def run_enrichment_job(db_path: Path) -> None:
+    """Sync wrapper that runs async enrichment via asyncio.run().
+
+    Called by APScheduler's thread pool. Enriches all approved but
+    unenriched signal cards in the database. Acts as a fallback for
+    cases where immediate enrichment on approval failed.
+
+    Args:
+        db_path: Path to the SQLite database.
+    """
+    from watchman.enrichment.pipeline import enrich_pending_approved  # noqa: PLC0415
+
+    try:
+        enriched = asyncio.run(enrich_pending_approved(db_path))
+        logger.info("Enrichment job complete: %d cards enriched", enriched)
+    except Exception:
+        logger.exception("Enrichment job failed")
+
+
+def schedule_enrichment_job(
+    scheduler: BackgroundScheduler, db_path: Path
+) -> None:
+    """Register a 1-hour interval enrichment fallback job with the scheduler.
+
+    Catches approved cards that were not enriched during the immediate
+    approval trigger (e.g., due to transient API failures).
+
+    Args:
+        scheduler: The APScheduler BackgroundScheduler to add the job to.
+        db_path: Path to the SQLite database.
+    """
+    scheduler.add_job(
+        run_enrichment_job,
+        trigger=IntervalTrigger(hours=1),
+        args=[db_path],
+        id="enrich-approved-cards",
+        replace_existing=True,
+    )
+    logger.info("Scheduled enrichment fallback job every 1 hour")
+
+
 def schedule_delivery_job(
     scheduler: BackgroundScheduler, db_path: Path, rubric_path: Path
 ) -> None:

@@ -95,6 +95,19 @@ def _handle_review_action(body: dict, client, state: str) -> None:  # noqa: ANN0
             text=f"Card {state}",
         )
         logger.info("Card %d %s", card_id, state)
+
+        # Trigger enrichment on approval (ENRCH-01)
+        if state == "approved":
+            try:
+                from watchman.enrichment.pipeline import enrich_approved_card  # noqa: PLC0415
+
+                asyncio.run(enrich_approved_card(card_id, db_path))
+                logger.info("Enrichment completed for card %d", card_id)
+            except Exception:
+                logger.exception(
+                    "Enrichment failed for card %d (will retry via fallback job)",
+                    card_id,
+                )
     except Exception:
         logger.exception("Failed to %s card %d", state, card_id)
         _post_error_ephemeral(
