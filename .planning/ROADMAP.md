@@ -61,10 +61,11 @@ Plans:
   1. Enrichment triggers only when Lauren approves a signal in Gate 1 (never on unapproved signals)
   2. Enriched entries include capabilities, pricing, API surface, and integration hooks extracted by LLM
   3. Every enriched entry validates against the IcebreakerAI tool registry Pydantic schema before proceeding
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Core enrichment module: DB migration, web scraper, Claude Sonnet extractor, pipeline orchestrator
+- [ ] 03-02-PLAN.md — Integration and tests: wire enrichment into Slack approve action, fallback scheduler job, unit tests
 
 ### Phase 4: Gate 2 and Output
 **Goal**: Lauren reviews enriched tool entries in a second Slack approval gate, and approved entries are written as IcebreakerAI-compatible JSON files
@@ -88,5 +89,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Collection Pipeline | 3/3 | Complete | 2026-02-24 |
 | 2. Scoring and Slack Review | 2/2 | Complete    | 2026-02-25 |
-| 3. Enrichment Pipeline | 0/1 | Not started | - |
+| 3. Enrichment Pipeline | 0/2 | Not started | - |
 | 4. Gate 2 and Output | 0/1 | Not started | - |
