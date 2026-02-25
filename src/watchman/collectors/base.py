@@ -67,8 +67,11 @@ class BaseCollector(ABC):
         """
         ...
 
-    async def run(self) -> int:
-        """Execute collection: fetch items, write to database, return count.
+    async def run(self, max_age_days: int | None = None) -> int:
+        """Execute collection: fetch items, optionally filter by age, write to database, return count.
+
+        Args:
+            max_age_days: If provided, filter out items older than this many days.
 
         Returns:
             Number of items written to the database.
@@ -80,6 +83,28 @@ class BaseCollector(ABC):
                     "Source '%s' returned 0 items", self.source.name
                 )
                 return 0
+
+            # Filter by age if specified
+            if max_age_days is not None:
+                from datetime import datetime, timedelta, timezone
+
+                cutoff = datetime.now(timezone.utc) - timedelta(days=max_age_days)
+                original_count = len(items)
+                items = [
+                    item for item in items
+                    if item.published_date
+                    and item.published_date.replace(
+                        tzinfo=timezone.utc if item.published_date.tzinfo is None else item.published_date.tzinfo
+                    ) >= cutoff
+                ]
+                filtered = original_count - len(items)
+                if filtered > 0:
+                    logger.info(
+                        "Source '%s': filtered %d items older than %d days (%d remaining)",
+                        self.source.name, filtered, max_age_days, len(items),
+                    )
+                if not items:
+                    return 0
 
             async with get_connection(self.db_path) as db:
                 repo = RawItemRepository(db)
