@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 Phase: 7 of 7 — All complete
 Plan: All plans complete
 Status: Human verification passed (7/7 tests), ready for milestone completion
-Last activity: 2026-02-25 - Completed quick task 2: Clean up code, pull last 2 weeks releases, clear DB, one-time delivery
+Last activity: 2026-02-25 - Completed quick task 3: Changelog splitting, title improvement, View More Signals button
 
 Progress: [██████████] 100%
 
@@ -70,6 +70,9 @@ Recent decisions affecting current work:
 - slack-bolt>=1.18 added as project dependency
 - Normalizer job scheduled unconditionally (no Slack dependency); source_configs from full registry
 - Daily digest gated on slack_enabled + SLACK_PAUL_USER_ID at schedule time
+- Changelog detection: source_name contains "Changelog" OR tier 3 + scrape collector
+- Split cards get unique url_hash by appending #title to URL before hashing
+- LLM imports lazy in normalizer to avoid hard anthropic dependency at module load
 
 ### Pending Todos
 
@@ -88,9 +91,10 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 1 | Switch LLM calls to OpenRouter | 2026-02-25 | 76f9351 | [1-switch-to-openrouter](./quick/1-switch-to-openrouter/) |
 | 2 | Clean up code pull (last 2 weeks releases) | 2026-02-25 | 7d1501f | [2-clean-up-code-pull-last-2-weeks-releases](./quick/2-clean-up-code-pull-last-2-weeks-releases/) |
+| 3 | Changelog splitting, title improvement, View More Signals | 2026-02-25 | fe0e2ee | [3-disable-huggingface-split-changelogs-int](./quick/3-disable-huggingface-split-changelogs-int/) |
 
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed quick task 2 (DB reset + 2-week collection)
+Stopped at: Completed quick task 3 (Changelog splitting + View More Signals)
 Resume file: .planning/phases/07-audit-gap-closure-runtime-fixes/.continue-here.md
