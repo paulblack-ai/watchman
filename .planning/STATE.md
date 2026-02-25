@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Never miss a strategically relevant AI tool or capability update that should be in the IcebreakerAI tool registry. Reliable signal detection with human-in-the-loop quality control.
-**Current focus:** Phase 2: Scoring and Slack Review (COMPLETE)
+**Current focus:** Phase 5: Wire Normalizer and Health Digest (COMPLETE)
 
 ## Current Position
 
-Phase: 2 of 4 (Scoring and Slack Review)
-Plan: 2 of 2 in current phase -- COMPLETE
-Status: Phase 2 complete, ready for Phase 3
-Last activity: 2026-02-25 - Completed quick task 1: Switch LLM calls to OpenRouter
+Phase: 5 of 6 (Wire Normalizer and Health Digest)
+Plan: 1 of 1 in current phase -- Complete
+Status: Phases 1-5 complete, Phase 6 not started
+Last activity: 2026-02-25 - Phase 5 execution complete (05-01)
 
-Progress: [█████░░░░░] 50%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: ~8 min
-- Total execution time: ~44 min
+- Total execution time: ~49 min
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [█████░░░░░] 50%
 |-------|-------|-------|----------|
 | 01-collection-pipeline | 3 | ~30 min | ~10 min |
 | 02-scoring-and-slack-review | 2 | ~8 min | ~4 min |
+| 05-wire-normalizer-and-health-digest | 1 | ~5 min | ~5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01, 01-02, 01-03, 02-01, 02-02
+- Last 5 plans: 01-03, 02-01, 02-02, 04-02, 05-01
 - Trend: Steady execution
 
 *Updated after each plan completion*
@@ -54,6 +55,8 @@ Recent decisions affecting current work:
 - card_id as button value (integer round-trip for DB lookup)
 - Daily delivery saves slack_message_ts per card (enables in-place chat_update)
 - slack-bolt>=1.18 added as project dependency
+- Normalizer job scheduled unconditionally (no Slack dependency); source_configs from full registry
+- Daily digest gated on slack_enabled + SLACK_PAUL_USER_ID at schedule time
 
 ### Pending Todos
 
@@ -74,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-24
-Stopped at: Completed 02-02-PLAN.md (Slack review interface)
+Last session: 2026-02-25
+Stopped at: Phase 5 complete, ready for Phase 6
 Resume file: None

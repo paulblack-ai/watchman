@@ -66,8 +66,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Core enrichment module: DB migration, web scraper, Claude Sonnet extractor, pipeline orchestrator
-- [ ] 03-02-PLAN.md — Integration and tests: wire enrichment into Slack approve action, fallback scheduler job, unit tests
+- [x] 03-01-PLAN.md — Core enrichment module: DB migration, web scraper, Claude Sonnet extractor, pipeline orchestrator
+- [x] 03-02-PLAN.md — Integration and tests: wire enrichment into Slack approve action, fallback scheduler job, unit tests
 
 ### Phase 4: Gate 2 and Output
 **Goal**: Lauren reviews enriched tool entries in a second Slack approval gate, and approved entries are written as IcebreakerAI-compatible JSON files
@@ -80,8 +80,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Gate 2 core: DB migration, Block Kit cards, action handlers, JSON output writer, enrichment pipeline wiring
-- [ ] 04-02-PLAN.md -- Tests: Gate 2 flow tests and JSON output writer tests
+- [x] 04-01-PLAN.md -- Gate 2 core: DB migration, Block Kit cards, action handlers, JSON output writer, enrichment pipeline wiring
+- [x] 04-02-PLAN.md -- Tests: Gate 2 flow tests and JSON output writer tests
 
 ### Phase 5: Wire Normalizer and Health Digest
 **Goal**: Close critical pipeline gap — connect normalizer and daily health digest to the scheduler so raw items become signal cards and persistent source failures get daily notifications
@@ -93,7 +93,10 @@ Plans:
   2. URL dedup and content fingerprint dedup execute as part of normalization (both live inside `process_unprocessed()`)
   3. Scheduler calls `send_daily_digest()` once daily, delivering a health summary to Slack
   4. Full pipeline flow works end-to-end: collection → normalization → scoring → Slack delivery
-**Plans**: 0 plans
+**Plans**: 1 plan
+
+Plans:
+- [ ] 05-01-PLAN.md -- Wire normalizer and daily digest: add job functions to scheduler/jobs.py, wire into main.py, unit tests
 
 ### Phase 6: Tech Debt and Doc Sync
 **Goal**: Fix deprecated APIs, sync documentation with actual state, and add missing verification artifacts
@@ -115,8 +118,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Collection Pipeline | 3/3 | Complete | 2026-02-24 |
-| 2. Scoring and Slack Review | 2/2 | Complete    | 2026-02-25 |
-| 3. Enrichment Pipeline | 0/2 | Not started | - |
-| 4. Gate 2 and Output | 0/1 | Not started | - |
-| 5. Wire Normalizer and Health Digest | 0/0 | Not started | - |
+| 2. Scoring and Slack Review | 2/2 | Complete | 2026-02-25 |
+| 3. Enrichment Pipeline | 2/2 | Complete | 2026-02-25 |
+| 4. Gate 2 and Output | 2/2 | Complete | 2026-02-25 |
+| 5. Wire Normalizer and Health Digest | 0/1 | Planned | - |
 | 6. Tech Debt and Doc Sync | 0/0 | Not started | - |
