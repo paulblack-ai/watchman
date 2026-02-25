@@ -89,13 +89,39 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | | |
+| SRC-01 | Phase 1 | Pending |
+| SRC-02 | Phase 1 | Pending |
+| SRC-03 | Phase 1 | Pending |
+| SRC-04 | Phase 1 | Pending |
+| COLL-01 | Phase 1 | Pending |
+| COLL-02 | Phase 1 | Pending |
+| COLL-03 | Phase 1 | Pending |
+| COLL-04 | Phase 1 | Pending |
+| PROC-01 | Phase 1 | Pending |
+| PROC-02 | Phase 1 | Pending |
+| PROC-03 | Phase 1 | Pending |
+| PROC-04 | Phase 2 | Pending |
+| PROC-05 | Phase 2 | Pending |
+| PROC-06 | Phase 2 | Pending |
+| SLCK-01 | Phase 2 | Pending |
+| SLCK-02 | Phase 2 | Pending |
+| SLCK-03 | Phase 2 | Pending |
+| SLCK-04 | Phase 2 | Pending |
+| ENRCH-01 | Phase 3 | Pending |
+| ENRCH-02 | Phase 3 | Pending |
+| ENRCH-03 | Phase 3 | Pending |
+| OUT-01 | Phase 4 | Pending |
+| OUT-02 | Phase 4 | Pending |
+| OUT-03 | Phase 4 | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 22 total
-- Mapped to phases: 0
-- Unmapped: 22
+- v1 requirements: 27 total
+- Mapped to phases: 27
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after initial definition*
+*Last updated: 2026-02-24 after roadmap creation*
