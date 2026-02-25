@@ -7,7 +7,7 @@ import threading
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-from watchman.slack.actions import register_actions
+from watchman.slack.actions import register_actions, register_gate2_actions
 from watchman.slack.commands import register_commands
 
 logger = logging.getLogger(__name__)
@@ -28,6 +28,7 @@ def create_slack_app() -> App:
     app = App(token=os.environ["SLACK_BOT_TOKEN"])
 
     register_actions(app)
+    register_gate2_actions(app)
     register_commands(app)
 
     logger.info("Slack Bolt App created with all handlers registered")

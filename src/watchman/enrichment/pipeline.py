@@ -1,6 +1,8 @@
 """Enrichment pipeline: scrape, extract, validate, and store tool entries."""
 
+import asyncio
 import logging
+import os
 from pathlib import Path
 
 from watchman.enrichment.extractor import enrich_card
@@ -46,6 +48,8 @@ async def enrich_approved_card(
     Returns:
         Validated IcebreakerToolEntry if enrichment succeeds, None otherwise.
     """
+    entry = None
+
     async with get_connection(db_path) as db:
         repo = CardRepository(db)
 
@@ -78,7 +82,6 @@ async def enrich_approved_card(
             logger.info(
                 "Enrichment complete for card %d: %s", card_id, card.title[:60]
             )
-            return entry
 
         except Exception as e:
             await repo.save_enrichment_error(card_id, str(e))
@@ -86,6 +89,79 @@ async def enrich_approved_card(
                 "Enrichment failed for card %d (%s)", card_id, card.title[:60]
             )
             return None
+
+    # Deliver Gate 2 Slack card outside the DB connection (OUT-01)
+    if entry is not None:
+        try:
+            deliver_gate2_card(card_id, db_path)
+        except Exception:
+            logger.exception(
+                "Gate 2 delivery failed for card %d (card is enriched, delivery will retry)",
+                card_id,
+            )
+
+    return entry
+
+
+def deliver_gate2_card(card_id: int, db_path: Path) -> None:
+    """Post a Gate 2 review card to Slack after enrichment completes.
+
+    Loads the enriched card and its IcebreakerToolEntry, builds a Gate 2
+    Block Kit card, and posts it to the configured Slack channel.
+    Triggered immediately after successful enrichment.
+
+    Args:
+        card_id: ID of the enriched card.
+        db_path: Path to the SQLite database.
+    """
+    from slack_sdk import WebClient  # noqa: PLC0415
+
+    from watchman.slack.blocks import build_gate2_card_blocks  # noqa: PLC0415
+
+    slack_token = os.environ.get("SLACK_BOT_TOKEN")
+    channel_id = os.environ.get("SLACK_CHANNEL_ID")
+
+    if not slack_token or not channel_id:
+        logger.warning(
+            "Slack not configured, skipping Gate 2 delivery for card %d", card_id
+        )
+        return
+
+    async def _load():  # noqa: ANN202
+        async with get_connection(db_path) as db:
+            repo = CardRepository(db)
+            card = await _load_card_by_id(repo, card_id)
+            return card
+
+    card = asyncio.run(_load())
+    if card is None or card.enrichment_data is None:
+        logger.warning("Card %d has no enrichment data for Gate 2", card_id)
+        return
+
+    entry = IcebreakerToolEntry.model_validate_json(card.enrichment_data)
+    can_re_enrich = (card.enrichment_attempt_count or 1) < 3
+
+    blocks = build_gate2_card_blocks(card, entry, can_re_enrich=can_re_enrich)
+
+    client = WebClient(token=slack_token)
+    try:
+        response = client.chat_postMessage(
+            channel=channel_id,
+            blocks=blocks,
+            text=f"Gate 2 Review: {entry.name}",
+        )
+        # Save the Gate 2 message timestamp for later updates
+        message_ts = response.get("ts")
+
+        async def _save_ts() -> None:
+            async with get_connection(db_path) as db:
+                repo = CardRepository(db)
+                await repo.set_gate2_state(card_id, "pending", slack_ts=message_ts)
+
+        asyncio.run(_save_ts())
+        logger.info("Gate 2 card posted for card %d: %s", card_id, entry.name)
+    except Exception:
+        logger.exception("Failed to post Gate 2 card for card %d", card_id)
 
 
 async def enrich_pending_approved(db_path: Path) -> int:
