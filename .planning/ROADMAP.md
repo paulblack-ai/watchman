@@ -29,12 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Duplicate signals (same URL or same title+date across sources) appear only once in the card table
   4. A source that returns zero results for 2+ consecutive runs triggers a Slack health alert
   5. IcebreakerAI tool registry schema is encoded as Pydantic models and available for downstream validation
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md — Project foundation: package setup, Pydantic models, source registry, SQLite database, repositories
+- [ ] 01-02-PLAN.md — Collectors and scheduler: RSS/API/scrape collectors with APScheduler automation
+- [ ] 01-03-PLAN.md — Signal processing and health: normalization, deduplication, Slack health alerts
 
 ### Phase 2: Scoring and Slack Review
 **Goal**: Lauren receives a curated, scored review queue in Slack and can approve, reject, or snooze each signal card
@@ -45,6 +45,8 @@ Plans:
   2. Lauren receives no more than 3-7 scored cards per day in Slack, formatted with Block Kit
   3. Lauren can approve, reject, or snooze any card via Slack buttons, and the action updates signal state in the database
   4. Snoozed cards re-appear in the queue after 30 days
+**Notes**:
+  - Phase 2 should include a `/watchman add-source` slash command so Lauren can add sources directly from Slack (DEC-008)
 **Plans**: TBD
 
 Plans:
