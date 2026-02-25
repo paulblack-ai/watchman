@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "watchman"
+version = "0.1.0"
+description = "AI ecosystem signal collection and processing pipeline"
+requires-python = ">=3.11"
+dependencies = [
+    "feedparser>=6.0",
+    "httpx>=0.28",
+    "trafilatura>=2.0",
+    "APScheduler>=3.10,<4",
+    "pydantic>=2.0",
+    "aiosqlite>=0.20",
+    "pyyaml>=6.0",
+    "slack-sdk>=3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.1",
+    "black>=23.0",
+]
+
+[project.scripts]
+watchman = "watchman.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
