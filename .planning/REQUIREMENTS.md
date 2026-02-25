@@ -12,7 +12,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SRC-01**: System loads sources from a YAML config file with type (rss/api/scrape), URL, tier (1/2/3), and scan frequency per source
 - [x] **SRC-02**: Adding a new source requires only a new YAML entry, zero code changes
 - [x] **SRC-03**: System includes 15-20 starter sources across Tier 1 (structured/official), Tier 2 (launch platforms), and Tier 3 (SaaS changelogs)
-- [x] **SRC-04**: System monitors per-source health and alerts via Slack when a source yields zero results for 2+ consecutive runs
+- [ ] **SRC-04**: System monitors per-source health and alerts via Slack when a source yields zero results for 2+ consecutive runs
 
 ### Collection
 
@@ -23,9 +23,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Signal Processing
 
-- [x] **PROC-01**: System normalizes raw items into structured signal cards (title, source, date, summary, URL, tier)
-- [x] **PROC-02**: System deduplicates signals by URL hash before scoring
-- [x] **PROC-03**: System deduplicates signals by content fingerprint (normalized title + date) to catch cross-source duplicates
+- [ ] **PROC-01**: System normalizes raw items into structured signal cards (title, source, date, summary, URL, tier)
+- [ ] **PROC-02**: System deduplicates signals by URL hash before scoring
+- [ ] **PROC-03**: System deduplicates signals by content fingerprint (normalized title + date) to catch cross-source duplicates
 - [x] **PROC-04**: System scores signals against IcebreakerAI relevance rubric (taxonomy fit, novel capability, adoption/traction, credibility) using Claude Haiku
 - [x] **PROC-05**: System enforces a daily volume cap (3-7 cards) to prevent signal fatigue
 - [x] **PROC-06**: System persists score breakdown per signal for future calibration
@@ -92,14 +92,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SRC-01 | Phase 1 | Complete |
 | SRC-02 | Phase 1 | Complete |
 | SRC-03 | Phase 1 | Complete |
-| SRC-04 | Phase 1 | Complete |
+| SRC-04 | Phase 5 | Pending |
 | COLL-01 | Phase 1 | Complete |
 | COLL-02 | Phase 1 | Complete |
 | COLL-03 | Phase 1 | Complete |
 | COLL-04 | Phase 1 | Complete |
-| PROC-01 | Phase 1 | Complete |
-| PROC-02 | Phase 1 | Complete |
-| PROC-03 | Phase 1 | Complete |
+| PROC-01 | Phase 5 | Pending |
+| PROC-02 | Phase 5 | Pending |
+| PROC-03 | Phase 5 | Pending |
 | PROC-04 | Phase 2 | Complete |
 | PROC-05 | Phase 2 | Complete |
 | PROC-06 | Phase 2 | Complete |
@@ -124,4 +124,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after roadmap creation*
+*Last updated: 2026-02-25 after gap closure phase creation*

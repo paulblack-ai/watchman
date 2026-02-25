@@ -16,6 +16,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Scoring and Slack Review** - LLM scoring, daily volume cap, and Slack review queue with approve/reject/snooze
 - [ ] **Phase 3: Enrichment Pipeline** - Approval-gated enrichment producing draft tool entries validated against IcebreakerAI schema
 - [ ] **Phase 4: Gate 2 and Output** - Second approval gate and JSON output emitter completing the pipeline end-to-end
+- [ ] **Phase 5: Wire Normalizer and Health Digest** - Connect normalizer and daily health digest to scheduler (gap closure)
+- [ ] **Phase 6: Tech Debt and Doc Sync** - Fix deprecated APIs, sync docs with actual state (gap closure)
 
 ## Phase Details
 
@@ -81,10 +83,34 @@ Plans:
 - [ ] 04-01-PLAN.md -- Gate 2 core: DB migration, Block Kit cards, action handlers, JSON output writer, enrichment pipeline wiring
 - [ ] 04-02-PLAN.md -- Tests: Gate 2 flow tests and JSON output writer tests
 
+### Phase 5: Wire Normalizer and Health Digest
+**Goal**: Close critical pipeline gap — connect normalizer and daily health digest to the scheduler so raw items become signal cards and persistent source failures get daily notifications
+**Depends on**: Phase 1
+**Requirements**: PROC-01, PROC-02, PROC-03, SRC-04
+**Gap Closure:** Closes gaps from v1 audit (normalizer never scheduled, daily digest never scheduled)
+**Success Criteria** (what must be TRUE):
+  1. Scheduler calls `process_unprocessed()` on a recurring schedule, converting raw items into signal cards
+  2. URL dedup and content fingerprint dedup execute as part of normalization (both live inside `process_unprocessed()`)
+  3. Scheduler calls `send_daily_digest()` once daily, delivering a health summary to Slack
+  4. Full pipeline flow works end-to-end: collection → normalization → scoring → Slack delivery
+**Plans**: 0 plans
+
+### Phase 6: Tech Debt and Doc Sync
+**Goal**: Fix deprecated APIs, sync documentation with actual state, and add missing verification artifacts
+**Depends on**: Phase 5
+**Requirements**: None (tech debt / documentation)
+**Gap Closure:** Closes tech debt items from v1 audit
+**Success Criteria** (what must be TRUE):
+  1. All `datetime.utcnow()` calls replaced with `datetime.now(UTC)`
+  2. SUMMARY docs reference OPENROUTER_API_KEY (not ANTHROPIC_API_KEY)
+  3. REQUIREMENTS.md checkboxes match actual implementation status (SLCK-01–04, OUT-01–03 checked)
+  4. Phases 1 and 3 have VERIFICATION.md files
+**Plans**: 0 plans
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -92,3 +118,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 2. Scoring and Slack Review | 2/2 | Complete    | 2026-02-25 |
 | 3. Enrichment Pipeline | 0/2 | Not started | - |
 | 4. Gate 2 and Output | 0/1 | Not started | - |
+| 5. Wire Normalizer and Health Digest | 0/0 | Not started | - |
+| 6. Tech Debt and Doc Sync | 0/0 | Not started | - |
