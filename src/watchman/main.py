@@ -77,8 +77,10 @@ def main() -> None:
 
     # Import scheduler after DB init to avoid circular imports
     from watchman.scheduler.jobs import (  # noqa: PLC0415
+        schedule_daily_digest_job,
         schedule_delivery_job,
         schedule_enrichment_job,
+        schedule_normalizer_job,
         schedule_scoring_job,
         setup_scheduler,
     )
@@ -89,9 +91,21 @@ def main() -> None:
     # Add enrichment fallback job (runs regardless of Slack)
     schedule_enrichment_job(scheduler, db_path)
 
+    # Build source_configs from full registry for normalizer tier lookup
+    # Uses all sources (not just enabled) so items from temporarily-disabled
+    # sources still get correct tier assignment
+    source_configs: dict[str, object] = {s.name: s for s in registry.sources}
+
+    # Add normalizer job (runs unconditionally — no Slack dependency)
+    schedule_normalizer_job(scheduler, db_path, source_configs)
+
     # Add daily delivery job only when Slack is configured
     if slack_enabled:
         schedule_delivery_job(scheduler, db_path, rubric_path)
+
+        # Add daily health digest only when Slack + Paul's user ID are available
+        if os.environ.get("SLACK_PAUL_USER_ID"):
+            schedule_daily_digest_job(scheduler, db_path)
 
     scheduler.start()
 
