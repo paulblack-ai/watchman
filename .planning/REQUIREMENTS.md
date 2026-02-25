@@ -39,9 +39,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Enrichment
 
-- [ ] **ENRCH-01**: System triggers enrichment only on Gate 1 approval (never on unapproved signals)
-- [ ] **ENRCH-02**: Enrichment extracts capabilities, pricing, API surface, and integration hooks using LLM
-- [ ] **ENRCH-03**: Enrichment output is validated against IcebreakerAI tool registry schema via Pydantic
+- [x] **ENRCH-01**: System triggers enrichment only on Gate 1 approval (never on unapproved signals)
+- [x] **ENRCH-02**: Enrichment extracts capabilities, pricing, API surface, and integration hooks using LLM
+- [x] **ENRCH-03**: Enrichment output is validated against IcebreakerAI tool registry schema via Pydantic
 
 ### Output (Gate 2)
 
@@ -107,9 +107,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SLCK-02 | Phase 2 | Pending |
 | SLCK-03 | Phase 2 | Pending |
 | SLCK-04 | Phase 2 | Pending |
-| ENRCH-01 | Phase 3 | Pending |
-| ENRCH-02 | Phase 3 | Pending |
-| ENRCH-03 | Phase 3 | Pending |
+| ENRCH-01 | Phase 3 | Complete |
+| ENRCH-02 | Phase 3 | Complete |
+| ENRCH-03 | Phase 3 | Complete |
 | OUT-01 | Phase 4 | Pending |
 | OUT-02 | Phase 4 | Pending |
 | OUT-03 | Phase 4 | Pending |
