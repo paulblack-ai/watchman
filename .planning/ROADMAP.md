@@ -87,6 +87,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Collection Pipeline | 0/3 | Not started | - |
-| 2. Scoring and Slack Review | 0/2 | Not started | - |
+| 2. Scoring and Slack Review | 1/2 | In Progress|  |
 | 3. Enrichment Pipeline | 0/1 | Not started | - |
 | 4. Gate 2 and Output | 0/1 | Not started | - |

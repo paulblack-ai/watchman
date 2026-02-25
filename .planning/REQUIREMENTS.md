@@ -26,9 +26,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **PROC-01**: System normalizes raw items into structured signal cards (title, source, date, summary, URL, tier)
 - [x] **PROC-02**: System deduplicates signals by URL hash before scoring
 - [x] **PROC-03**: System deduplicates signals by content fingerprint (normalized title + date) to catch cross-source duplicates
-- [ ] **PROC-04**: System scores signals against IcebreakerAI relevance rubric (taxonomy fit, novel capability, adoption/traction, credibility) using Claude Haiku
-- [ ] **PROC-05**: System enforces a daily volume cap (3-7 cards) to prevent signal fatigue
-- [ ] **PROC-06**: System persists score breakdown per signal for future calibration
+- [x] **PROC-04**: System scores signals against IcebreakerAI relevance rubric (taxonomy fit, novel capability, adoption/traction, credibility) using Claude Haiku
+- [x] **PROC-05**: System enforces a daily volume cap (3-7 cards) to prevent signal fatigue
+- [x] **PROC-06**: System persists score breakdown per signal for future calibration
 
 ### Slack Review (Gate 1)
 
@@ -100,9 +100,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROC-01 | Phase 1 | Complete |
 | PROC-02 | Phase 1 | Complete |
 | PROC-03 | Phase 1 | Complete |
-| PROC-04 | Phase 2 | Pending |
-| PROC-05 | Phase 2 | Pending |
-| PROC-06 | Phase 2 | Pending |
+| PROC-04 | Phase 2 | Complete |
+| PROC-05 | Phase 2 | Complete |
+| PROC-06 | Phase 2 | Complete |
 | SLCK-01 | Phase 2 | Pending |
 | SLCK-02 | Phase 2 | Pending |
 | SLCK-03 | Phase 2 | Pending |
