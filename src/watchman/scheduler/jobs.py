@@ -135,6 +135,113 @@ def schedule_enrichment_job(
     logger.info("Scheduled enrichment fallback job every 1 hour")
 
 
+def run_normalizer_job(db_path: Path, source_configs: dict[str, SourceConfig]) -> None:
+    """Sync wrapper that runs async normalization via asyncio.run().
+
+    Called by APScheduler's thread pool. Processes all unprocessed raw items,
+    normalizing them into signal cards and deduplicating by URL and content
+    fingerprint.
+
+    Args:
+        db_path: Path to the SQLite database.
+        source_configs: Dict of source name -> SourceConfig for tier lookup.
+    """
+    from watchman.processing.normalizer import process_unprocessed  # noqa: PLC0415
+
+    try:
+        new_cards = asyncio.run(process_unprocessed(db_path, source_configs))
+        logger.info("Normalizer job complete: %d new cards created", new_cards)
+    except Exception:
+        logger.exception("Normalizer job failed")
+
+
+def schedule_normalizer_job(
+    scheduler: BackgroundScheduler, db_path: Path, source_configs: dict[str, SourceConfig]
+) -> None:
+    """Register a 15-minute interval normalizer job with the scheduler.
+
+    Runs more frequently than scoring (30 min) so raw items are normalized
+    before the next scoring cycle fires.
+
+    Args:
+        scheduler: The APScheduler BackgroundScheduler to add the job to.
+        db_path: Path to the SQLite database.
+        source_configs: Dict of source name -> SourceConfig for tier lookup.
+    """
+    scheduler.add_job(
+        run_normalizer_job,
+        trigger=IntervalTrigger(minutes=15),
+        args=[db_path, source_configs],
+        id="normalize-raw-items",
+        replace_existing=True,
+    )
+    logger.info("Scheduled normalizer job every 15 minutes")
+
+
+def run_daily_digest_job(db_path: Path) -> None:
+    """Sync wrapper that runs the daily health digest via asyncio.run().
+
+    Called by APScheduler's thread pool once daily. Fetches all currently
+    failing sources and sends a summary DM to Paul via Slack.
+
+    Reads SLACK_BOT_TOKEN and SLACK_PAUL_USER_ID from environment at
+    runtime (not at schedule time) for resilience.
+
+    Args:
+        db_path: Path to the SQLite database.
+    """
+    import os  # noqa: PLC0415
+
+    from watchman.health.alerter import send_daily_digest  # noqa: PLC0415
+    from watchman.health.tracker import get_daily_digest  # noqa: PLC0415
+
+    token = os.environ.get("SLACK_BOT_TOKEN")
+    user_id = os.environ.get("SLACK_PAUL_USER_ID")
+
+    if not token or not user_id:
+        logger.warning(
+            "Slack credentials not configured, skipping daily health digest"
+        )
+        return
+
+    try:
+        failing_sources = asyncio.run(get_daily_digest(db_path))
+        if not failing_sources:
+            logger.info("Daily health digest: no failing sources")
+            return
+        success = send_daily_digest(
+            token=token, user_id=user_id, failing_sources=failing_sources
+        )
+        if success:
+            logger.info(
+                "Daily health digest sent: %d failing sources",
+                len(failing_sources),
+            )
+        else:
+            logger.warning("Daily health digest failed to send")
+    except Exception:
+        logger.exception("Daily digest job failed")
+
+
+def schedule_daily_digest_job(
+    scheduler: BackgroundScheduler, db_path: Path
+) -> None:
+    """Register a daily 8 AM health digest job with the scheduler.
+
+    Args:
+        scheduler: The APScheduler BackgroundScheduler to add the job to.
+        db_path: Path to the SQLite database.
+    """
+    scheduler.add_job(
+        run_daily_digest_job,
+        trigger=CronTrigger(hour=8, minute=0),
+        args=[db_path],
+        id="send-daily-health-digest",
+        replace_existing=True,
+    )
+    logger.info("Scheduled daily health digest job at 08:00 AM")
+
+
 def schedule_delivery_job(
     scheduler: BackgroundScheduler, db_path: Path, rubric_path: Path
 ) -> None:
