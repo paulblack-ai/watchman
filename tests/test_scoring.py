@@ -197,9 +197,9 @@ async def test_score_card_returns_rubric_score(
     mock_response = MagicMock()
     mock_response.content = [MagicMock(text=sample_rubric_score.model_dump_json())]
 
-    with patch("watchman.scoring.scorer.anthropic.Anthropic") as mock_anthropic_cls:
+    with patch("watchman.scoring.scorer.get_client") as mock_get_client:
         mock_client = MagicMock()
-        mock_anthropic_cls.return_value = mock_client
+        mock_get_client.return_value = mock_client
         mock_client.messages.create.return_value = mock_response
 
         result = await score_card(sample_card, rubric)
@@ -217,15 +217,15 @@ async def test_score_card_uses_correct_model(
     mock_response = MagicMock()
     mock_response.content = [MagicMock(text=sample_rubric_score.model_dump_json())]
 
-    with patch("watchman.scoring.scorer.anthropic.Anthropic") as mock_anthropic_cls:
+    with patch("watchman.scoring.scorer.get_client") as mock_get_client:
         mock_client = MagicMock()
-        mock_anthropic_cls.return_value = mock_client
+        mock_get_client.return_value = mock_client
         mock_client.messages.create.return_value = mock_response
 
         await score_card(sample_card, rubric)
 
         call_kwargs = mock_client.messages.create.call_args
-        assert call_kwargs.kwargs["model"] == "claude-haiku-4-5-20251001"
+        assert call_kwargs.kwargs["model"] == "anthropic/claude-haiku-4-5-20251001"
 
 
 @pytest.mark.integration
@@ -236,9 +236,9 @@ async def test_score_card_uses_structured_output(
     mock_response = MagicMock()
     mock_response.content = [MagicMock(text=sample_rubric_score.model_dump_json())]
 
-    with patch("watchman.scoring.scorer.anthropic.Anthropic") as mock_anthropic_cls:
+    with patch("watchman.scoring.scorer.get_client") as mock_get_client:
         mock_client = MagicMock()
-        mock_anthropic_cls.return_value = mock_client
+        mock_get_client.return_value = mock_client
         mock_client.messages.create.return_value = mock_response
 
         await score_card(sample_card, rubric)

@@ -6,6 +6,7 @@ from pathlib import Path
 import anthropic
 import aiosqlite
 
+from watchman.llm_client import get_client
 from watchman.models.signal_card import SignalCard
 from watchman.scoring.models import RubricScore
 from watchman.scoring.rubric import RubricConfig, load_rubric
@@ -68,11 +69,11 @@ async def score_card(card: SignalCard, rubric: RubricConfig) -> RubricScore:
         anthropic.APIError: If the Anthropic API call fails.
         ValueError: If the response cannot be parsed as a valid RubricScore.
     """
-    client = anthropic.Anthropic()
+    client = get_client()
     prompt = _build_scoring_prompt(card, rubric)
 
     response = client.messages.create(
-        model="claude-haiku-4-5-20251001",
+        model="anthropic/claude-haiku-4-5-20251001",
         max_tokens=512,
         messages=[{"role": "user", "content": prompt}],
         betas=["output-128k-2025-02-19"],

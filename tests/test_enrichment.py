@@ -144,10 +144,10 @@ async def test_enrich_card_returns_validated_entry():
     mock_content.text = _make_valid_entry_json()
     mock_response.content = [mock_content]
 
-    with patch("watchman.enrichment.extractor.anthropic.Anthropic") as mock_anthropic:
+    with patch("watchman.enrichment.extractor.get_client") as mock_get_client:
         mock_client = MagicMock()
         mock_client.messages.create.return_value = mock_response
-        mock_anthropic.return_value = mock_client
+        mock_get_client.return_value = mock_client
 
         entry = await enrich_card(
             card_title="TestAI",

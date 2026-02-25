@@ -5,6 +5,7 @@ from datetime import datetime
 
 import anthropic
 
+from watchman.llm_client import get_client
 from watchman.models.icebreaker import IcebreakerToolEntry
 
 logger = logging.getLogger(__name__)
@@ -86,11 +87,11 @@ async def enrich_card(
         anthropic.APIError: If the Anthropic API call fails.
         pydantic.ValidationError: If the response cannot be validated.
     """
-    client = anthropic.Anthropic()
+    client = get_client()
     prompt = _build_enrichment_prompt(card_title, card_url, card_summary, page_content)
 
     response = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="anthropic/claude-sonnet-4-20250514",
         max_tokens=1024,
         messages=[{"role": "user", "content": prompt}],
         betas=["output-128k-2025-02-19"],
