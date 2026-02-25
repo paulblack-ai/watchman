@@ -1,4 +1,5 @@
 """Action handlers for Slack review buttons: approve, reject, snooze, details."""
+from __future__ import annotations
 
 import asyncio
 import json

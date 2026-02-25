@@ -1,4 +1,5 @@
 """JSON output writer for IcebreakerAI-compatible tool entries."""
+from __future__ import annotations
 
 import logging
 import os

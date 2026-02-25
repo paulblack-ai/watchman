@@ -1,4 +1,5 @@
 """Slash command handler for /watchman add-source."""
+from __future__ import annotations
 
 import logging
 import re

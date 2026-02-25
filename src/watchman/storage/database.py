@@ -1,4 +1,5 @@
 """SQLite database initialization and connection management."""
+from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from pathlib import Path

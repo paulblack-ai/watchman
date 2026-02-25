@@ -1,4 +1,5 @@
 """Shared Anthropic client factory configured for OpenRouter."""
+from __future__ import annotations
 
 import os
 

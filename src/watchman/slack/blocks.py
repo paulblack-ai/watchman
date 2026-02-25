@@ -227,6 +227,7 @@ def build_review_footer(showing: int, total: int) -> list[dict]:
 
     remaining = total - showing
     if remaining > 0:
+        next_batch = min(remaining, 5)
         blocks.append(
             {
                 "type": "actions",
@@ -235,7 +236,7 @@ def build_review_footer(showing: int, total: int) -> list[dict]:
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": f"View {remaining} more signals",
+                            "text": f"View next {next_batch} signals ({remaining} remaining)",
                             "emoji": True,
                         },
                         "action_id": "view_more_signals",

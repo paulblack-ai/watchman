@@ -1,4 +1,5 @@
 """Bolt App initialization and Socket Mode handler setup."""
+from __future__ import annotations
 
 import logging
 import os

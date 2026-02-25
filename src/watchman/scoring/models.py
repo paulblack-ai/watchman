@@ -1,4 +1,5 @@
 """Pydantic models for rubric-based scoring data."""
+from __future__ import annotations
 
 from pydantic import BaseModel, Field
 

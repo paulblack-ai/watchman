@@ -1,4 +1,5 @@
 """One-shot script: wipe DB, collect last 2 weeks, normalize, score, deliver to Slack."""
+from __future__ import annotations
 
 import asyncio
 import logging

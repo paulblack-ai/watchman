@@ -1,4 +1,5 @@
 """Daily review queue delivery job: posts scored signal cards to Slack."""
+from __future__ import annotations
 
 import json
 import logging
