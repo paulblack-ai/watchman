@@ -1,5 +1,6 @@
 """Claude Haiku-based relevance scorer for signal cards."""
 
+import asyncio
 import logging
 from pathlib import Path
 
@@ -14,6 +15,8 @@ from watchman.storage.database import get_connection
 from watchman.storage.repositories import CardRepository
 
 logger = logging.getLogger(__name__)
+
+SCORING_CONCURRENCY = 20
 
 
 def _build_scoring_prompt(card: SignalCard, rubric: RubricConfig) -> str:
@@ -31,28 +34,20 @@ def _build_scoring_prompt(card: SignalCard, rubric: RubricConfig) -> str:
         for name, dim in rubric.dimensions.items()
     )
 
-    return f"""You are scoring an AI industry signal card for relevance to the IcebreakerAI tool registry.
+    return f"""Score this AI signal card for the IcebreakerAI tool registry.
 
-## Signal Card
+Title: {card.title}
+URL: {card.url}
+Source: {card.source_name} (Tier {card.tier})
+Summary: {card.summary or 'No summary available.'}
 
-**Title:** {card.title}
-**URL:** {card.url}
-**Source:** {card.source_name} (Tier {card.tier})
-**Summary:** {card.summary or 'No summary available.'}
-
-## Scoring Rubric
-
-Score each dimension from 0 to {rubric.score_scale} (0 = not relevant, {rubric.score_scale} = highly relevant).
-
+Rubric (0-{rubric.score_scale} per dimension):
 {dimensions_text}
 
-## Instructions
+Composite = {' + '.join(f'{name}*{dim.weight}' for name, dim in rubric.dimensions.items())}
 
-1. Score each dimension from 0-{rubric.score_scale} with a brief rationale (1-2 sentences).
-2. Compute the composite_score as the weighted sum: {' + '.join(f'{name} * {dim.weight}' for name, dim in rubric.dimensions.items())}.
-3. Set top_dimension to the dimension name with the highest weighted contribution to the composite score.
-
-Respond with a JSON object matching the required schema."""
+Respond with ONLY this JSON (no markdown, no extra text):
+{{"taxonomy_fit":{{"score":N,"rationale":"..."}},"novel_capability":{{"score":N,"rationale":"..."}},"adoption_traction":{{"score":N,"rationale":"..."}},"credibility":{{"score":N,"rationale":"..."}},"composite_score":N,"top_dimension":"..."}}"""
 
 
 async def score_card(card: SignalCard, rubric: RubricConfig) -> RubricScore:
@@ -72,26 +67,36 @@ async def score_card(card: SignalCard, rubric: RubricConfig) -> RubricScore:
     client = get_client()
     prompt = _build_scoring_prompt(card, rubric)
 
-    response = client.messages.create(
+    response = await asyncio.to_thread(
+        client.messages.create,
         model="anthropic/claude-haiku-4.5",
-        max_tokens=512,
+        max_tokens=1024,
         messages=[{"role": "user", "content": prompt}],
     )
 
     # Extract JSON from response text (may be wrapped in markdown code fences)
     text = response.content[0].text.strip()
     if text.startswith("```"):
-        # Strip markdown code fences
         lines = text.split("\n")
         text = "\n".join(lines[1:-1]).strip()
-    return RubricScore.model_validate_json(text)
+
+    import json as _json
+
+    parsed = _json.loads(text)
+    # Handle nested structures: LLM sometimes wraps scores inside extra keys
+    if "taxonomy_fit" not in parsed:
+        # Try to find the scores nested one level deep
+        for val in parsed.values():
+            if isinstance(val, dict) and "taxonomy_fit" in val:
+                parsed = val
+                break
+    return RubricScore.model_validate(parsed)
 
 
 async def score_unscored_cards(db_path: Path, rubric_path: Path) -> int:
     """Find and score all unscored, non-duplicate signal cards.
 
-    Scores each card sequentially (not parallel) to be rate-limit friendly.
-    Persists scores to the database via CardRepository.
+    Processes cards in batches of SCORING_CONCURRENCY with progressive DB saves.
 
     Args:
         db_path: Path to the SQLite database.
@@ -102,6 +107,7 @@ async def score_unscored_cards(db_path: Path, rubric_path: Path) -> int:
     """
     rubric = load_rubric(rubric_path)
     scored_count = 0
+    failed_count = 0
 
     async with get_connection(db_path) as db:
         repo = CardRepository(db)
@@ -111,28 +117,49 @@ async def score_unscored_cards(db_path: Path, rubric_path: Path) -> int:
             logger.info("No unscored cards found — skipping scoring run")
             return 0
 
-        logger.info("Found %d unscored cards to score", len(unscored))
+        total = len(unscored)
+        logger.info(
+            "Found %d unscored cards to score (batch_size=%d)",
+            total,
+            SCORING_CONCURRENCY,
+        )
 
-        for card in unscored:
-            try:
-                logger.info(
-                    "Scoring card %d: %s", card.id, card.title[:60]
-                )
-                rubric_score = await score_card(card, rubric)
-                await repo.save_score(card.id, rubric_score)
-                scored_count += 1
-                logger.info(
-                    "Scored card %d: composite=%.2f top_dim=%s",
-                    card.id,
-                    rubric_score.composite_score,
-                    rubric_score.top_dimension,
-                )
-            except Exception:
-                logger.exception(
-                    "Failed to score card %d (%s)", card.id, card.title[:60]
-                )
-                # Continue scoring remaining cards despite failure
-                continue
+        # Process in batches for progressive saves and rate-limit safety
+        for i in range(0, total, SCORING_CONCURRENCY):
+            batch = unscored[i : i + SCORING_CONCURRENCY]
 
-    logger.info("Scoring run complete: %d/%d cards scored", scored_count, len(unscored))
+            async def _score_one(card: SignalCard) -> tuple[int, RubricScore | None]:
+                try:
+                    rubric_score = await score_card(card, rubric)
+                    return card.id, rubric_score
+                except Exception:
+                    logger.warning(
+                        "Failed to score card %d (%s)",
+                        card.id,
+                        card.title[:60],
+                    )
+                    return card.id, None
+
+            results = await asyncio.gather(*[_score_one(c) for c in batch])
+
+            for card_id, rubric_score in results:
+                if rubric_score is not None:
+                    await repo.save_score(card_id, rubric_score)
+                    scored_count += 1
+                else:
+                    failed_count += 1
+
+            logger.info(
+                "Progress: %d/%d scored (%d failed)",
+                scored_count,
+                total,
+                failed_count,
+            )
+
+    logger.info(
+        "Scoring run complete: %d/%d cards scored (%d failed)",
+        scored_count,
+        total,
+        failed_count,
+    )
     return scored_count

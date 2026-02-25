@@ -18,6 +18,6 @@ def get_client() -> anthropic.Anthropic:
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY environment variable is not set")
     return anthropic.Anthropic(
-        base_url="https://openrouter.ai/api/v1",
+        base_url="https://openrouter.ai/api",
         api_key=api_key,
     )

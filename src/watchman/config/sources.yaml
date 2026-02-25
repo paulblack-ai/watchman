@@ -1,131 +1,109 @@
 sources:
-  # ========================================
-  # Tier 1: Structured / Official AI Releases
-  # Scan every 4 hours
-  # ========================================
-  - name: "OpenAI Blog"
-    type: rss
-    url: "https://openai.com/blog/rss.xml"
-    tier: 1
-    frequency: "4h"
-    enabled: true
-
-  - name: "Anthropic Blog"
-    type: rss
-    url: "https://www.anthropic.com/rss.xml"
-    tier: 1
-    frequency: "4h"
-    enabled: true
-
-  - name: "Google AI Blog"
-    type: rss
-    url: "https://blog.google/technology/ai/rss/"
-    tier: 1
-    frequency: "4h"
-    enabled: true
-
-  - name: "Meta AI Blog"
-    type: rss
-    url: "https://ai.meta.com/blog/rss/"
-    tier: 1
-    frequency: "4h"
-    enabled: true
-
-  - name: "HuggingFace Blog"
-    type: rss
-    url: "https://huggingface.co/blog/feed.xml"
-    tier: 1
-    frequency: "4h"
-    enabled: true
-
-  # ========================================
-  # Tier 2: Launch Platforms
-  # Scan every 12 hours
-  # ========================================
-  - name: "Hacker News AI"
-    type: api
-    url: "https://hn.algolia.com/api/v1/search_by_date?tags=show_hn&query=AI&hitsPerPage=20"
-    tier: 2
-    frequency: "12h"
-    enabled: true
-
-  - name: "Product Hunt AI"
-    type: scrape
-    url: "https://www.producthunt.com/topics/artificial-intelligence"
-    tier: 2
-    frequency: "12h"
-    enabled: true
-
-  - name: "GitHub Trending"
-    type: scrape
-    url: "https://github.com/trending?since=daily&spoken_language_code=en"
-    tier: 2
-    frequency: "12h"
-    enabled: true
-
-  - name: "BetaList"
-    type: scrape
-    url: "https://betalist.com/topics/artificial-intelligence"
-    tier: 2
-    frequency: "12h"
-    enabled: true
-
-  - name: "TechCrunch AI"
-    type: rss
-    url: "https://techcrunch.com/category/artificial-intelligence/feed/"
-    tier: 2
-    frequency: "12h"
-    enabled: true
-
-  - name: "VentureBeat AI"
-    type: rss
-    url: "https://venturebeat.com/category/ai/feed/"
-    tier: 2
-    frequency: "12h"
-    enabled: true
-
-  # ========================================
-  # Tier 3: SaaS Changelogs
-  # Scan every 24 hours
-  # ========================================
-  - name: "Notion Changelog"
-    type: scrape
-    url: "https://www.notion.com/releases"
-    tier: 3
-    frequency: "24h"
-    enabled: true
-
-  - name: "Figma Changelog"
-    type: scrape
-    url: "https://www.figma.com/whats-new/"
-    tier: 3
-    frequency: "24h"
-    enabled: true
-
-  - name: "Linear Changelog"
-    type: scrape
-    url: "https://linear.app/changelog"
-    tier: 3
-    frequency: "24h"
-    enabled: true
-
-  - name: "Vercel Changelog"
-    type: scrape
-    url: "https://vercel.com/changelog"
-    tier: 3
-    frequency: "24h"
-    enabled: true
-
-  - name: "Supabase Changelog"
-    type: scrape
-    url: "https://supabase.com/changelog"
-    tier: 3
-    frequency: "24h"
-    enabled: true
-
-  - name: "Stripe Changelog"
-    type: scrape
-    url: "https://stripe.com/blog/changelog"
-    tier: 3
-    frequency: "24h"
-    enabled: true
+- name: OpenAI Blog
+  type: rss
+  url: https://openai.com/blog/rss.xml
+  tier: 1
+  frequency: 4h
+  enabled: true
+- name: Anthropic Blog
+  type: rss
+  url: https://www.anthropic.com/rss.xml
+  tier: 1
+  frequency: 4h
+  enabled: true
+- name: Google AI Blog
+  type: rss
+  url: https://blog.google/technology/ai/rss/
+  tier: 1
+  frequency: 4h
+  enabled: true
+- name: Meta AI Blog
+  type: rss
+  url: https://ai.meta.com/blog/rss/
+  tier: 1
+  frequency: 4h
+  enabled: true
+- name: HuggingFace Blog
+  type: rss
+  url: https://huggingface.co/blog/feed.xml
+  tier: 1
+  frequency: 4h
+  enabled: true
+- name: Hacker News AI
+  type: api
+  url: https://hn.algolia.com/api/v1/search_by_date?tags=show_hn&query=AI&hitsPerPage=20
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: Product Hunt AI
+  type: scrape
+  url: https://www.producthunt.com/topics/artificial-intelligence
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: GitHub Trending
+  type: scrape
+  url: https://github.com/trending?since=daily&spoken_language_code=en
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: BetaList
+  type: scrape
+  url: https://betalist.com/topics/artificial-intelligence
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: TechCrunch AI
+  type: rss
+  url: https://techcrunch.com/category/artificial-intelligence/feed/
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: VentureBeat AI
+  type: rss
+  url: https://venturebeat.com/category/ai/feed/
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: Notion Changelog
+  type: scrape
+  url: https://www.notion.com/releases
+  tier: 3
+  frequency: 24h
+  enabled: true
+- name: Figma Changelog
+  type: scrape
+  url: https://www.figma.com/whats-new/
+  tier: 3
+  frequency: 24h
+  enabled: true
+- name: Linear Changelog
+  type: scrape
+  url: https://linear.app/changelog
+  tier: 3
+  frequency: 24h
+  enabled: true
+- name: Vercel Changelog
+  type: scrape
+  url: https://vercel.com/changelog
+  tier: 3
+  frequency: 24h
+  enabled: true
+- name: Supabase Changelog
+  type: scrape
+  url: https://supabase.com/changelog
+  tier: 3
+  frequency: 24h
+  enabled: true
+- name: Stripe Changelog
+  type: scrape
+  url: https://stripe.com/blog/changelog
+  tier: 3
+  frequency: 24h
+  enabled: true
+- name: Crescendo
+  type: scrape
+  url: https://www.crescendo.ai/news/latest-ai-news-and-updates
+  tier: 2
+  frequency: 12h
+  enabled: true

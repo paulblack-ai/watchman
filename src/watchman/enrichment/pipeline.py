@@ -93,7 +93,7 @@ async def enrich_approved_card(
     # Deliver Gate 2 Slack card outside the DB connection (OUT-01)
     if entry is not None:
         try:
-            deliver_gate2_card(card_id, db_path)
+            await async_deliver_gate2_card(card_id, db_path)
         except Exception:
             logger.exception(
                 "Gate 2 delivery failed for card %d (card is enriched, delivery will retry)",
@@ -103,12 +103,11 @@ async def enrich_approved_card(
     return entry
 
 
-def deliver_gate2_card(card_id: int, db_path: Path) -> None:
-    """Post a Gate 2 review card to Slack after enrichment completes.
+async def async_deliver_gate2_card(card_id: int, db_path: Path) -> None:
+    """Post a Gate 2 review card to Slack after enrichment completes (async).
 
     Loads the enriched card and its IcebreakerToolEntry, builds a Gate 2
     Block Kit card, and posts it to the configured Slack channel.
-    Triggered immediately after successful enrichment.
 
     Args:
         card_id: ID of the enriched card.
@@ -127,13 +126,10 @@ def deliver_gate2_card(card_id: int, db_path: Path) -> None:
         )
         return
 
-    async def _load():  # noqa: ANN202
-        async with get_connection(db_path) as db:
-            repo = CardRepository(db)
-            card = await _load_card_by_id(repo, card_id)
-            return card
+    async with get_connection(db_path) as db:
+        repo = CardRepository(db)
+        card = await _load_card_by_id(repo, card_id)
 
-    card = asyncio.run(_load())
     if card is None or card.enrichment_data is None:
         logger.warning("Card %d has no enrichment data for Gate 2", card_id)
         return
@@ -145,23 +141,26 @@ def deliver_gate2_card(card_id: int, db_path: Path) -> None:
 
     client = WebClient(token=slack_token)
     try:
-        response = client.chat_postMessage(
+        response = await asyncio.to_thread(
+            client.chat_postMessage,
             channel=channel_id,
             blocks=blocks,
             text=f"Gate 2 Review: {entry.name}",
         )
-        # Save the Gate 2 message timestamp for later updates
         message_ts = response.get("ts")
 
-        async def _save_ts() -> None:
-            async with get_connection(db_path) as db:
-                repo = CardRepository(db)
-                await repo.set_gate2_state(card_id, "pending", slack_ts=message_ts)
+        async with get_connection(db_path) as db:
+            repo = CardRepository(db)
+            await repo.set_gate2_state(card_id, "pending", slack_ts=message_ts)
 
-        asyncio.run(_save_ts())
         logger.info("Gate 2 card posted for card %d: %s", card_id, entry.name)
     except Exception:
         logger.exception("Failed to post Gate 2 card for card %d", card_id)
+
+
+def deliver_gate2_card(card_id: int, db_path: Path) -> None:
+    """Sync wrapper for async_deliver_gate2_card (for use outside async context)."""
+    asyncio.run(async_deliver_gate2_card(card_id, db_path))
 
 
 async def enrich_pending_approved(db_path: Path) -> int:
