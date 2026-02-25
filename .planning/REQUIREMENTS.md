@@ -9,9 +9,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Source Management
 
-- [ ] **SRC-01**: System loads sources from a YAML config file with type (rss/api/scrape), URL, tier (1/2/3), and scan frequency per source
-- [ ] **SRC-02**: Adding a new source requires only a new YAML entry, zero code changes
-- [ ] **SRC-03**: System includes 15-20 starter sources across Tier 1 (structured/official), Tier 2 (launch platforms), and Tier 3 (SaaS changelogs)
+- [x] **SRC-01**: System loads sources from a YAML config file with type (rss/api/scrape), URL, tier (1/2/3), and scan frequency per source
+- [x] **SRC-02**: Adding a new source requires only a new YAML entry, zero code changes
+- [x] **SRC-03**: System includes 15-20 starter sources across Tier 1 (structured/official), Tier 2 (launch platforms), and Tier 3 (SaaS changelogs)
 - [ ] **SRC-04**: System monitors per-source health and alerts via Slack when a source yields zero results for 2+ consecutive runs
 
 ### Collection
@@ -51,8 +51,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: SQLite database serves as integration bus between pipeline stages
-- [ ] **INFRA-02**: IcebreakerAI tool registry schema is obtained and encoded as Pydantic models before enrichment code is written
+- [x] **INFRA-01**: SQLite database serves as integration bus between pipeline stages
+- [x] **INFRA-02**: IcebreakerAI tool registry schema is obtained and encoded as Pydantic models before enrichment code is written
 - [ ] **INFRA-03**: System runs as a single-process cron agent on Paul's machine or AWS instance
 
 ## v2 Requirements
@@ -89,9 +89,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SRC-01 | Phase 1 | Pending |
-| SRC-02 | Phase 1 | Pending |
-| SRC-03 | Phase 1 | Pending |
+| SRC-01 | Phase 1 | Complete |
+| SRC-02 | Phase 1 | Complete |
+| SRC-03 | Phase 1 | Complete |
 | SRC-04 | Phase 1 | Pending |
 | COLL-01 | Phase 1 | Pending |
 | COLL-02 | Phase 1 | Pending |
@@ -113,8 +113,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OUT-01 | Phase 4 | Pending |
 | OUT-02 | Phase 4 | Pending |
 | OUT-03 | Phase 4 | Pending |
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
+| INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Pending |
 
 **Coverage:**
