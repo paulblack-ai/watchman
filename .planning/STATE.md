@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 Phase: 2 of 4 (Scoring and Slack Review)
 Plan: 2 of 2 in current phase -- COMPLETE
 Status: Phase 2 complete, ready for Phase 3
-Last activity: 2026-02-24 -- Completed Phase 2 Plan 02 (Slack review interface)
+Last activity: 2026-02-25 - Completed quick task 1: Switch LLM calls to OpenRouter
 
 Progress: [█████░░░░░] 50%
 
@@ -64,7 +64,13 @@ None yet.
 - IcebreakerAI tool registry schema must be obtained before Phase 3 enrichment code is written (assigned to Phase 1 as INFRA-02)
 - Slack workspace and bot credentials need to be configured before running Watchman with Slack enabled (SLACK_BOT_TOKEN, SLACK_APP_TOKEN, SLACK_CHANNEL_ID)
 - Tier 3 scrape source list needs to be finalized for the starter 15-20 sources
-- ANTHROPIC_API_KEY environment variable must be set at runtime for scoring to work
+- OPENROUTER_API_KEY environment variable must be set at runtime for scoring and enrichment to work
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 1 | Switch LLM calls to OpenRouter | 2026-02-25 | 76f9351 | [1-switch-to-openrouter](./quick/1-switch-to-openrouter/) |
 
 ## Session Continuity
 
