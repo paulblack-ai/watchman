@@ -215,7 +215,11 @@ def normalize_raw_item(
     date = item.published_date or item.fetched_at
     summary = override_summary if override_summary is not None else item.summary
 
-    url_hash = SignalCard.compute_url_hash(url)
+    # For split cards (override_title set), make url_hash unique by appending title
+    if override_title:
+        url_hash = SignalCard.compute_url_hash(f"{url}#{override_title}")
+    else:
+        url_hash = SignalCard.compute_url_hash(url)
     # Use override title for fingerprint so split cards get distinct fingerprints
     content_fingerprint = SignalCard.compute_content_fingerprint(title, date)
 
