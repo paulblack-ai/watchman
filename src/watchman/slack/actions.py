@@ -15,6 +15,8 @@ from watchman.slack.blocks import (
     build_confirmed_card_blocks,
     build_details_blocks,
     build_gate2_confirmed_blocks,
+    build_review_footer,
+    build_signal_card_blocks,
 )
 from watchman.storage.database import get_connection
 from watchman.storage.repositories import CardRepository
@@ -451,4 +453,112 @@ def _handle_re_enrich_action(body: dict, client) -> None:  # noqa: ANN001
         logger.exception("Failed to re-enrich card %d", card_id)
         _post_error_ephemeral(
             client, body, "Failed to trigger re-enrichment. Please try again."
+        )
+
+
+def register_view_more_action(app: App) -> None:
+    """Register the 'View More Signals' pagination action handler.
+
+    Responds to the view_more_signals button by fetching and posting the
+    next batch of scored cards, then showing an updated footer.
+
+    Args:
+        app: Configured Bolt App to register the handler on.
+    """
+
+    @app.action("view_more_signals")
+    def handle_view_more(ack, body, client, logger):  # noqa: ANN001, ANN202
+        """Handle the View More Signals button click."""
+        ack()
+        _handle_view_more_signals(body, client)
+
+
+def _handle_view_more_signals(body: dict, client) -> None:  # noqa: ANN001
+    """Fetch the next batch of scored cards and post them to the channel.
+
+    Parses offset from the button value, fetches up to PAGE_SIZE cards,
+    posts each as a signal card with review buttons, then posts an updated
+    footer with a new "View More" button if cards remain.
+
+    Args:
+        body: Slack action payload.
+        client: Slack WebClient for API calls.
+    """
+    PAGE_SIZE = 5
+
+    action = body["actions"][0]
+    payload = json.loads(action["value"])
+    offset = int(payload["offset"])
+    channel_id = body["channel"]["id"]
+
+    db_path = _get_db_path()
+
+    async def _fetch_batch():  # noqa: ANN202
+        async with get_connection(db_path) as db:
+            repo = CardRepository(db)
+            cards = await repo.find_next_scored_batch(offset=offset, limit=PAGE_SIZE)
+            total = await repo.count_scored_today()
+            return cards, total
+
+    try:
+        cards, total = asyncio.run(_fetch_batch())
+
+        delivered = 0
+        for card in cards:
+            if card.score_breakdown is None:
+                logger.warning("Card %d has no score_breakdown, skipping", card.id)
+                continue
+
+            try:
+                score = RubricScore.model_validate_json(card.score_breakdown)
+            except Exception:
+                logger.exception(
+                    "Failed to parse score for card %d, skipping", card.id
+                )
+                continue
+
+            blocks = build_signal_card_blocks(card, score)
+
+            response = client.chat_postMessage(
+                channel=channel_id,
+                blocks=blocks,
+                text=f"Signal: {card.title}",
+            )
+
+            # Save slack_message_ts so action handlers can update the message
+            message_ts = response.get("ts")
+
+            async def _save_review_state(
+                card_id: int, ts: str, ch: str
+            ) -> None:
+                async with get_connection(db_path) as db:
+                    repo = CardRepository(db)
+                    await repo.set_review_state(
+                        card_id, "pending", slack_ts=ts, slack_channel=ch
+                    )
+
+            asyncio.run(_save_review_state(card.id, message_ts, channel_id))
+            delivered += 1
+
+        total_shown = offset + delivered
+        footer_blocks = build_review_footer(total_shown, total)
+        client.chat_postMessage(
+            channel=channel_id,
+            blocks=footer_blocks,
+            text=f"Showing {total_shown} of {total} signals today",
+        )
+
+        logger.info(
+            "View More: delivered %d cards (offset=%d, total_shown=%d, total=%d)",
+            delivered,
+            offset,
+            total_shown,
+            total,
+        )
+    except Exception:
+        logger.exception("Failed to handle view_more_signals action")
+        _post_error_ephemeral(
+            client,
+            body,
+            "Failed to load more signals. Please try again.",
         )
