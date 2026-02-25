@@ -254,6 +254,36 @@ class CardRepository:
             rows = await cursor.fetchall()
             return [self._row_to_card(row) for row in rows]
 
+    async def find_next_scored_batch(self, offset: int, limit: int) -> list[SignalCard]:
+        """Find the next batch of scored cards after the initial delivery.
+
+        Uses the same selection criteria as find_top_scored_today but with
+        OFFSET for pagination (e.g., triggered by "View More Signals" button).
+
+        Args:
+            offset: Number of cards to skip (typically the initial delivery count).
+            limit: Maximum number of cards to return in this batch.
+
+        Returns:
+            List of SignalCard instances ordered by score.
+        """
+        async with self.db.execute(
+            """SELECT * FROM cards
+               WHERE relevance_score IS NOT NULL
+               AND (
+                   (review_state = 'pending'
+                    AND date(created_at) = date('now'))
+                   OR
+                   (review_state = 'snoozed'
+                    AND snooze_until <= datetime('now'))
+               )
+               ORDER BY relevance_score DESC, tier ASC
+               LIMIT ? OFFSET ?""",
+            (limit, offset),
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [self._row_to_card(row) for row in rows]
+
     async def count_scored_today(self) -> int:
         """Count all scored cards created today.
 

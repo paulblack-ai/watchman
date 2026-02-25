@@ -199,14 +199,20 @@ def build_details_blocks(card: SignalCard, score: RubricScore) -> list[dict]:
 def build_review_footer(showing: int, total: int) -> list[dict]:
     """Build a Block Kit footer showing how many signals are in today's review.
 
+    When total > showing, includes a "View More Signals" action button
+    that carries the offset and remaining count as JSON value.
+
     Args:
         showing: Number of cards shown in this digest.
         total: Total number of scored cards created today.
 
     Returns:
-        List of Slack Block Kit block dicts with the footer context.
+        List of Slack Block Kit block dicts with the footer context
+        and optional view-more button.
     """
-    blocks = [
+    import json
+
+    blocks: list[dict] = [
         {
             "type": "context",
             "elements": [
@@ -217,6 +223,29 @@ def build_review_footer(showing: int, total: int) -> list[dict]:
             ],
         }
     ]
+
+    remaining = total - showing
+    if remaining > 0:
+        blocks.append(
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": f"View {remaining} more signals",
+                            "emoji": True,
+                        },
+                        "action_id": "view_more_signals",
+                        "value": json.dumps(
+                            {"offset": showing, "remaining": remaining}
+                        ),
+                    }
+                ],
+            }
+        )
+
     return blocks
 
 
