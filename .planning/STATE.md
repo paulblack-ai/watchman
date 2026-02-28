@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 Phase: 7 of 7 — All complete
 Plan: All plans complete
 Status: Human verification passed (7/7 tests), ready for milestone completion
-Last activity: 2026-02-25 - Completed quick task 5: Fix view-more button text and Python 3.9 compat
+Last activity: 2026-02-28 - Completed quick task 6: Fix broken source URLs and crawling methods
 
 Progress: [██████████] 100%
 
@@ -73,6 +73,9 @@ Recent decisions affecting current work:
 - Changelog detection: source_name contains "Changelog" OR tier 3 + scrape collector
 - Split cards get unique url_hash by appending #title to URL before hashing
 - LLM imports lazy in normalizer to avoid hard anthropic dependency at module load
+- JinaCollector added for sites blocking direct scrapers (uses r.jina.ai markdown API)
+- Anthropic and Meta AI have no public RSS feeds; switched to Jina-based collection
+- Changelog detection may need update: some changelogs now use "jina" collector type instead of "scrape"
 
 ### Pending Todos
 
@@ -94,9 +97,10 @@ None yet.
 | 3 | Changelog splitting, title improvement, View More Signals | 2026-02-25 | fe0e2ee | [3-disable-huggingface-split-changelogs-int](./quick/3-disable-huggingface-split-changelogs-int/) |
 | 4 | View More Signals pagination handler | 2026-02-25 | 4411754 | [4-view-more-signals-in-increments-of-5](./quick/4-view-more-signals-in-increments-of-5/) |
 | 5 | Fix view-more button text and Python 3.9 compat | 2026-02-25 | 5ee7cdb | [5-fix-view-more-signals-button-count-and-c](./quick/5-fix-view-more-signals-button-count-and-c/) |
+| 6 | Fix broken source URLs and crawling methods | 2026-02-28 | f1d240a | [6-fix-broken-source-urls-and-crawling-meth](./quick/6-fix-broken-source-urls-and-crawling-meth/) |
 
 ## Session Continuity
 
-Last session: 2026-02-25
-Stopped at: Completed quick task 4 (View More Signals pagination handler)
+Last session: 2026-02-28
+Stopped at: Completed quick task 6 (Fix broken source URLs and crawling methods)
 Resume file: .planning/phases/07-audit-gap-closure-runtime-fixes/.continue-here.md
