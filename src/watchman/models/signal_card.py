@@ -22,7 +22,7 @@ class SignalCard(BaseModel):
     url: str
     tier: Literal[1, 2, 3]
     summary: str | None = None
-    collector_type: Literal["rss", "api", "scrape"]
+    collector_type: Literal["rss", "api", "scrape", "jina"]
     url_hash: str
     content_fingerprint: str | None = None
     duplicate_of: int | None = None
