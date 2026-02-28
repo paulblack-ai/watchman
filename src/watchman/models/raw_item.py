@@ -16,7 +16,7 @@ class RawItem(BaseModel):
 
     id: int | None = None
     source_name: str
-    collector_type: Literal["rss", "api", "scrape"]
+    collector_type: Literal["rss", "api", "scrape", "jina"]
     title: str | None = None
     url: str | None = None
     summary: str | None = None

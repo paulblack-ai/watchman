@@ -7,7 +7,7 @@ sources:
   enabled: true
 - name: Anthropic Blog
   type: rss
-  url: https://www.anthropic.com/rss.xml
+  url: https://www.anthropic.com/feed.xml
   tier: 1
   frequency: 4h
   enabled: true
@@ -19,13 +19,7 @@ sources:
   enabled: true
 - name: Meta AI Blog
   type: rss
-  url: https://ai.meta.com/blog/rss/
-  tier: 1
-  frequency: 4h
-  enabled: true
-- name: HuggingFace Blog
-  type: rss
-  url: https://huggingface.co/blog/feed.xml
+  url: https://ai.meta.com/blog/feed/
   tier: 1
   frequency: 4h
   enabled: true
@@ -35,20 +29,23 @@ sources:
   tier: 2
   frequency: 12h
   enabled: true
+# Product Hunt blocks direct scrapers with 403; Jina can render it
 - name: Product Hunt AI
-  type: scrape
+  type: jina
   url: https://www.producthunt.com/topics/artificial-intelligence
   tier: 2
   frequency: 12h
   enabled: true
+# GitHub Trending is JavaScript-rendered; trafilatura can't extract
 - name: GitHub Trending
-  type: scrape
+  type: jina
   url: https://github.com/trending?since=daily&spoken_language_code=en
   tier: 2
   frequency: 12h
   enabled: true
+# BetaList blocks direct scrapers; Jina can render it
 - name: BetaList
-  type: scrape
+  type: jina
   url: https://betalist.com/topics/artificial-intelligence
   tier: 2
   frequency: 12h
@@ -61,7 +58,7 @@ sources:
   enabled: true
 - name: VentureBeat AI
   type: rss
-  url: https://venturebeat.com/category/ai/feed/
+  url: https://venturebeat.com/feed/
   tier: 2
   frequency: 12h
   enabled: true
@@ -77,8 +74,9 @@ sources:
   tier: 3
   frequency: 24h
   enabled: true
+# Linear Changelog is JavaScript-rendered; switching to Jina
 - name: Linear Changelog
-  type: scrape
+  type: jina
   url: https://linear.app/changelog
   tier: 3
   frequency: 24h
@@ -95,9 +93,10 @@ sources:
   tier: 3
   frequency: 24h
   enabled: true
+# Stripe blog/changelog path was wrong; using actual changelog URL via Jina
 - name: Stripe Changelog
-  type: scrape
-  url: https://stripe.com/blog/changelog
+  type: jina
+  url: https://stripe.com/docs/changelog
   tier: 3
   frequency: 24h
   enabled: true
