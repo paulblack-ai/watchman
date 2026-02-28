@@ -5,9 +5,10 @@ sources:
   tier: 1
   frequency: 4h
   enabled: true
+# Anthropic has no public RSS feed; using Jina to scrape their research page
 - name: Anthropic Blog
-  type: rss
-  url: https://www.anthropic.com/feed.xml
+  type: jina
+  url: https://www.anthropic.com/research
   tier: 1
   frequency: 4h
   enabled: true
@@ -17,9 +18,10 @@ sources:
   tier: 1
   frequency: 4h
   enabled: true
+# Meta AI has no public RSS feed; using Jina to scrape their blog page
 - name: Meta AI Blog
-  type: rss
-  url: https://ai.meta.com/blog/feed/
+  type: jina
+  url: https://ai.meta.com/blog/
   tier: 1
   frequency: 4h
   enabled: true
@@ -58,7 +60,7 @@ sources:
   enabled: true
 - name: VentureBeat AI
   type: rss
-  url: https://venturebeat.com/feed/
+  url: https://venturebeat.com/category/ai/feed/
   tier: 2
   frequency: 12h
   enabled: true
