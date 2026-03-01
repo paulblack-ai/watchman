@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 Phase: 7 of 7 — All complete
 Plan: All plans complete
 Status: Human verification passed (7/7 tests), ready for milestone completion
-Last activity: 2026-02-28 - Completed quick task 6: Fix broken source URLs and crawling methods
+Last activity: 2026-03-01 - Completed quick task 7: YouTube transcript scanning
 
 Progress: [██████████] 100%
 
@@ -76,6 +76,7 @@ Recent decisions affecting current work:
 - JinaCollector added for sites blocking direct scrapers (uses r.jina.ai markdown API)
 - Anthropic and Meta AI have no public RSS feeds; switched to Jina-based collection
 - Changelog detection may need update: some changelogs now use "jina" collector type instead of "scrape"
+- YouTube transcript scanning: keyword pre-filter gates transcript API calls, non-tool videos fall through to single-card normalization
 
 ### Pending Todos
 
@@ -98,9 +99,10 @@ None yet.
 | 4 | View More Signals pagination handler | 2026-02-25 | 4411754 | [4-view-more-signals-in-increments-of-5](./quick/4-view-more-signals-in-increments-of-5/) |
 | 5 | Fix view-more button text and Python 3.9 compat | 2026-02-25 | 5ee7cdb | [5-fix-view-more-signals-button-count-and-c](./quick/5-fix-view-more-signals-button-count-and-c/) |
 | 6 | Fix broken source URLs and crawling methods | 2026-02-28 | f1d240a | [6-fix-broken-source-urls-and-crawling-meth](./quick/6-fix-broken-source-urls-and-crawling-meth/) |
+| 7 | YouTube transcript scanning | 2026-03-01 | 3ec9706 | [7-youtube-transcript-scanning](./quick/7-youtube-transcript-scanning/) |
 
 ## Session Continuity
 
-Last session: 2026-02-28
-Stopped at: Completed quick task 6 (Fix broken source URLs and crawling methods)
+Last session: 2026-03-01
+Stopped at: Completed quick task 7 (YouTube transcript scanning)
 Resume file: .planning/phases/07-audit-gap-closure-runtime-fixes/.continue-here.md
