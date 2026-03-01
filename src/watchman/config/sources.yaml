@@ -145,3 +145,16 @@ sources:
   tier: 2
   frequency: 12h
   enabled: true
+# YouTube channels (RSS feeds from channel IDs)
+- name: Skill Leap AI (Futurepedia)
+  type: youtube
+  url: https://www.youtube.com/feeds/videos.xml?channel_id=UCwSozl89jl2zUDzQ4jGJD3g
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: Matt Wolfe
+  type: youtube
+  url: https://www.youtube.com/feeds/videos.xml?channel_id=UCuK2Mf5As9OKfWU7XV6yzCg
+  tier: 2
+  frequency: 12h
+  enabled: true

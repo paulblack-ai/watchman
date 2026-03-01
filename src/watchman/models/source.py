@@ -15,7 +15,7 @@ class SourceConfig(BaseModel):
     """
 
     name: str
-    type: Literal["rss", "api", "scrape", "jina"]
+    type: Literal["rss", "api", "scrape", "jina", "youtube"]
     url: HttpUrl
     tier: Literal[1, 2, 3]
     frequency: str
