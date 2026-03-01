@@ -212,11 +212,14 @@ class JinaCollector(BaseCollector):
         if len(matches) < 3:
             return []
 
-        # Filter out common navigation links
+        # Filter out common navigation links and short generic titles
         nav_words = {
             "home", "about", "contact", "login", "sign up", "sign in",
-            "privacy", "terms", "cookie", "menu", "search", "subscribe",
-            "read more", "learn more", "see all", "view all",
+            "privacy", "terms", "cookie", "cookies", "menu", "search",
+            "subscribe", "read more", "learn more", "see all", "view all",
+            "overview", "projects", "people", "careers", "resources",
+            "demos", "newsletter", "infrastructure", "open source",
+            "privacy policy", "terms of service", "the latest",
         }
 
         items: list[RawItem] = []
@@ -225,6 +228,9 @@ class JinaCollector(BaseCollector):
         for title, url in matches:
             title = title.strip()
             if title.lower() in nav_words:
+                continue
+            # Skip very short titles (likely nav: "Llama", "Get Meta AI")
+            if len(title.split()) <= 2 and len(title) < 20:
                 continue
             if url in seen_urls:
                 continue
