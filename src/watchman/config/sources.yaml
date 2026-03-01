@@ -108,3 +108,40 @@ sources:
   tier: 2
   frequency: 12h
   enabled: true
+# AI tool directories (added per Lauren's request)
+- name: There's An AI For That
+  type: jina
+  url: https://theresanaiforthat.com/
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: Future Tools
+  type: jina
+  url: https://www.futuretools.io/
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: Forward Future Tools
+  type: jina
+  url: https://tools.forwardfuture.ai/
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: AI Tools Directory
+  type: jina
+  url: https://aitoolsdirectory.com/
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: AIxploria
+  type: jina
+  url: https://www.aixploria.com/en/ultimate-list-ai/
+  tier: 2
+  frequency: 12h
+  enabled: true
+- name: NextGen Tools
+  type: jina
+  url: https://www.nxgntools.com/
+  tier: 2
+  frequency: 12h
+  enabled: true

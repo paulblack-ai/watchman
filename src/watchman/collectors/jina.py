@@ -27,6 +27,28 @@ class JinaCollector(BaseCollector):
 
     JINA_PREFIX = "https://r.jina.ai/"
 
+    # Patterns for junk entries to skip
+    _IMAGE_TITLE_RE = re.compile(r"^!\[")
+    _IMAGE_URL_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".ico")
+    _JUNK_URL_HOSTS = ("fbcdn.net", "scontent-", "static.xx.fbcdn")
+
+    @staticmethod
+    def _is_junk_entry(title: str, url: str) -> bool:
+        """Return True if entry is an image reference or other junk."""
+        if not title or not url:
+            return True
+        # Image markdown: ![alt text
+        if title.startswith("![") or title.startswith("!\\["):
+            return True
+        # Image URLs
+        url_lower = url.lower()
+        if any(url_lower.endswith(ext) for ext in JinaCollector._IMAGE_URL_SUFFIXES):
+            return True
+        # Facebook CDN / image hosting
+        if any(host in url_lower for host in JinaCollector._JUNK_URL_HOSTS):
+            return True
+        return False
+
     async def collect(self) -> list[RawItem]:
         """Fetch markdown via Jina and parse into RawItem entries.
 
@@ -135,8 +157,10 @@ class JinaCollector(BaseCollector):
             body = sections[i + 2].strip() if i + 2 < len(sections) else ""
             i += 3
 
-            # Skip empty or very short sections
+            # Skip empty, very short, or junk sections
             if not title or len(title) < 3:
+                continue
+            if self._is_junk_entry(title, source_url):
                 continue
 
             summary = body[:500] if body else None
@@ -203,6 +227,8 @@ class JinaCollector(BaseCollector):
             if title.lower() in nav_words:
                 continue
             if url in seen_urls:
+                continue
+            if self._is_junk_entry(title, url):
                 continue
             seen_urls.add(url)
 
