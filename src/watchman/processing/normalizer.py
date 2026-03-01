@@ -300,6 +300,34 @@ async def process_unprocessed(
                 source_cfg = source_configs.get(item.source_name)
                 tier = source_cfg.tier if source_cfg else 2
 
+                if item.collector_type == "youtube":
+                    from watchman.processing.transcript import (
+                        extract_tools_from_transcript,
+                        is_tool_announcement,
+                    )
+
+                    if is_tool_announcement(item.title or "", item.summary):
+                        tools = await extract_tools_from_transcript(item)
+                        if tools:
+                            logger.info(
+                                "YouTube video '%s' yielded %d tool cards",
+                                item.title,
+                                len(tools),
+                            )
+                            for tool in tools:
+                                card = normalize_raw_item(
+                                    item,
+                                    tier,
+                                    override_title=tool["title"],
+                                    override_summary=tool["description"],
+                                )
+                                if await _insert_and_dedup(card, card_repo):
+                                    new_cards += 1
+                            await raw_repo.mark_processed(item.id)
+                            continue
+                    # If not a tool announcement or extraction returned empty,
+                    # fall through to standard normalization below
+
                 if _is_changelog_candidate(item, source_cfg):
                     # Split changelog into individual feature cards
                     entries = await split_changelog_item(item)
