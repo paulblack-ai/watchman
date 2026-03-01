@@ -29,7 +29,7 @@ def collect_source(source: SourceConfig, db_path: Path) -> None:
     """
     try:
         collector = get_collector(source, db_path)
-        items_found = asyncio.run(collector.run())
+        items_found = asyncio.run(collector.run(max_age_days=14))
 
         # Record health metrics
         asyncio.run(

@@ -22,6 +22,10 @@ def main() -> None:
     Graceful degradation: if SLACK_BOT_TOKEN or SLACK_APP_TOKEN are missing,
     Slack features are disabled but all other functionality continues normally.
     """
+    # Load environment variables from .env file
+    from dotenv import load_dotenv
+    load_dotenv()
+
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,
