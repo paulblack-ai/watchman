@@ -10,49 +10,61 @@ from watchman.models.raw_item import RawItem
 
 logger = logging.getLogger(__name__)
 
-# Keyword patterns that indicate a tool-announcement video
-_TOOL_ANNOUNCEMENT_PATTERNS = re.compile(
-    r"new ai tool|just launched|just released|new feature|product launch"
-    r"|tools you need|tools this week|tools that|ai tools"
-    r"|top \d+ tool|best new|game.?changer|alternative to|just dropped"
-    r"|\d+\s+(?:new\s+)?(?:ai\s+)?tool",
+# Patterns that indicate skip-worthy content (tutorials, vlogs, lifestyle, opinions)
+_SKIP_PATTERNS = re.compile(
+    r"how i use|my workflow|morning routine|day in the life"
+    r"|tutorial for beginners|beginner.?s? guide"
+    r"|what .+ tell us about|explained for beginners"
+    r"|how to (?:start|learn|get into)|tips for"
+    r"|my (?:honest )?review of (?:chatgpt|copilot|gemini)"
+    r"|unpopular opinion|hot take|rant about",
     re.IGNORECASE,
 )
 
-# Patterns that indicate non-tool content (tutorials, vlogs, etc.)
-_NON_TOOL_PATTERNS = re.compile(
-    r"how i use|my workflow|morning routine|day in the life"
-    r"|tutorial for beginners",
+# Strong positive signals — always pass these through
+_STRONG_TOOL_PATTERNS = re.compile(
+    r"new ai tool|just launched|just released|just dropped"
+    r"|tools you need|tools this week|tools that|ai tools"
+    r"|top \d+ tool|best new|game.?changer|alternative to"
+    r"|\d+\s+(?:new\s+)?(?:ai\s+)?tool"
+    r"|product launch|new feature|is here|vs |i tested"
+    r"|first (?:ai|look)|hands.on|demo|launches|released"
+    r"|new (?:ai|app|model|platform|update|version)"
+    r"|ai (?:agent|browser|model|app|platform|assistant)",
     re.IGNORECASE,
 )
 
 
 def is_tool_announcement(title: str, description: str | None) -> bool:
-    """Keyword-based pre-filter to detect tool-announcement videos.
+    """Pre-filter to detect videos worth scanning for tool mentions.
 
-    Returns True if the title or description suggests the video covers
-    new AI tools, product launches, or feature releases. No LLM cost.
+    These YouTube sources are curated AI channels, so most content is
+    relevant. We use a permissive approach: skip only clearly irrelevant
+    content (tutorials, vlogs, lifestyle). Most videos from AI-focused
+    channels like Matt Wolfe and Futurepedia cover tools/products.
 
     Args:
         title: Video title.
         description: Video description (may be None).
 
     Returns:
-        True if the video likely announces tools; False otherwise.
+        True if the video is worth scanning for tool mentions.
     """
     combined = title
     if description:
         combined = f"{title} {description}"
 
-    has_tool_signal = bool(_TOOL_ANNOUNCEMENT_PATTERNS.search(combined))
-    has_non_tool_signal = bool(_NON_TOOL_PATTERNS.search(title))
+    # Strong positive signals always pass
+    if _STRONG_TOOL_PATTERNS.search(combined):
+        return True
 
-    # If title has non-tool signals and no tool signals, skip
-    if has_non_tool_signal and not has_tool_signal:
+    # Skip clearly irrelevant content
+    if _SKIP_PATTERNS.search(title):
         return False
 
-    # Only return True on positive match
-    return has_tool_signal
+    # Default: allow through for AI-focused channels
+    # These are curated sources — most videos are relevant
+    return True
 
 
 async def extract_tools_from_transcript(item: RawItem) -> list[dict]:
@@ -77,31 +89,40 @@ async def extract_tools_from_transcript(item: RawItem) -> list[dict]:
         logger.warning("No video_id in raw_data for YouTube item '%s'", item.title)
         return []
 
-    # Fetch transcript
+    # Fetch transcript (v1.x API: instance-based, .fetch(), snippet objects)
+    transcript_text = ""
     try:
         from youtube_transcript_api import YouTubeTranscriptApi
 
-        transcript_data = await asyncio.to_thread(
-            YouTubeTranscriptApi.get_transcript, video_id
-        )
-        transcript_text = " ".join(seg["text"] for seg in transcript_data)
+        api = YouTubeTranscriptApi()
+        transcript_data = await asyncio.to_thread(api.fetch, video_id)
+        transcript_text = " ".join(snippet.text for snippet in transcript_data)
         # Truncate to 4000 chars to keep LLM costs reasonable
         transcript_text = transcript_text[:4000]
+        logger.info("Fetched transcript for '%s' (%d chars)", item.title, len(transcript_text))
     except Exception:
         logger.warning(
-            "Failed to fetch transcript for video '%s' (id=%s)",
+            "Transcript unavailable for '%s' (id=%s), falling back to title+description",
             item.title,
             video_id,
         )
-        return []
 
-    if not transcript_text.strip():
+    # Build content for LLM: prefer transcript, fall back to description
+    if transcript_text.strip():
+        content_label = "Transcript"
+        content_text = transcript_text
+    elif item.summary and len(item.summary.strip()) > 50:
+        content_label = "Video description"
+        content_text = item.summary[:2000]
+    else:
+        # No transcript and no meaningful description — can't extract tools
+        logger.info("No transcript or description for '%s', skipping extraction", item.title)
         return []
 
     # LLM extraction
     prompt = (
         "Extract individual AI tools or products mentioned in this YouTube video "
-        "transcript as new launches, releases, or demos. Skip tools only mentioned "
+        f"{content_label.lower()} as new launches, releases, or demos. Skip tools only mentioned "
         "in passing (e.g., 'like ChatGPT'). Focus on tools being announced, demoed, "
         "or reviewed as new.\n\n"
         "Return a JSON array: "
@@ -109,7 +130,7 @@ async def extract_tools_from_transcript(item: RawItem) -> list[dict]:
         '"description": "1-2 sentence summary of what the tool does and why it matters"}]\n\n'
         "If no specific new tools are mentioned, return an empty array: []\n\n"
         f"Video title: {item.title}\n"
-        f"Transcript:\n{transcript_text}"
+        f"{content_label}:\n{content_text}"
     )
 
     try:
