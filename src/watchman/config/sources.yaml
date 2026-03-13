@@ -58,9 +58,10 @@ sources:
   tier: 2
   frequency: 12h
   enabled: true
+# VentureBeat /category/ai/feed/ went stale (last entry Jan 2026); main feed has fresh AI content
 - name: VentureBeat AI
   type: rss
-  url: https://venturebeat.com/category/ai/feed/
+  url: https://venturebeat.com/feed/
   tier: 2
   frequency: 12h
   enabled: true
@@ -70,9 +71,10 @@ sources:
   tier: 3
   frequency: 24h
   enabled: true
+# Figma /whats-new/ redirects to /release-notes/ and is JS-rendered; Jina extracts structured entries
 - name: Figma Changelog
-  type: scrape
-  url: https://www.figma.com/whats-new/
+  type: jina
+  url: https://www.figma.com/release-notes/
   tier: 3
   frequency: 24h
   enabled: true
