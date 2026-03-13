@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 Phase: 7 of 7 — All complete
 Plan: All plans complete
 Status: Human verification passed (7/7 tests), ready for milestone completion
-Last activity: 2026-03-13 - Completed quick task 8: Fix broken VentureBeat and Figma sources
+Last activity: 2026-03-13 - Completed quick task 9: Migrate Watchman to company EC2 instance
 
 Progress: [██████████] 100%
 
@@ -79,6 +79,7 @@ Recent decisions affecting current work:
 - YouTube transcript scanning: keyword pre-filter gates transcript API calls, non-tool videos fall through to single-card normalization
 - VentureBeat /category/ai/feed/ stale since Jan 2026; switched to /feed/ which has fresh daily AI content
 - Figma /whats-new/ redirects to /release-notes/ (JS-rendered); switched from scrape to jina collector
+- python-dotenv added to pyproject.toml (was missing from dependency list, discovered during EC2 migration)
 
 ### Pending Todos
 
@@ -103,9 +104,10 @@ None yet.
 | 6 | Fix broken source URLs and crawling methods | 2026-02-28 | f1d240a | [6-fix-broken-source-urls-and-crawling-meth](./quick/6-fix-broken-source-urls-and-crawling-meth/) |
 | 7 | YouTube transcript scanning | 2026-03-01 | 3ec9706 | [7-youtube-transcript-scanning](./quick/7-youtube-transcript-scanning/) |
 | 8 | Fix broken VentureBeat and Figma sources | 2026-03-13 | 763a8d7 | [8-fix-broken-watchman-sources-venturebeat-](./quick/8-fix-broken-watchman-sources-venturebeat-/) |
+| 9 | Migrate Watchman to company EC2 instance | 2026-03-13 | 81110d8 | [9-migrate-watchman-to-company-ec2-instance](./quick/9-migrate-watchman-to-company-ec2-instance/) |
 
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: Completed quick task 8 (Fix broken VentureBeat and Figma sources)
+Stopped at: Completed quick task 9 (Migrate Watchman to company EC2 instance)
 Resume file: .planning/phases/07-audit-gap-closure-runtime-fixes/.continue-here.md
