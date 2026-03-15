@@ -12,11 +12,11 @@ REQUIRED_PROPERTIES: dict[str, str] = {
     "Tier": "select",
     "Score": "number",
     "Top Dimension": "select",
-    "Review Status": "status",
+    "Review Status": "select",
     "Published": "date",
     "URL": "url",
     "Enrichment": "select",
-    "Gate 2": "status",
+    "Gate 2": "select",
     "Snooze Until": "date",
     "Attempts": "number",
 }
@@ -89,11 +89,11 @@ Source           | Select     | Source name (e.g. "TechCrunch")
 Tier             | Select     | Options: 1, 2, 3
 Score            | Number     | Relevance score (0-1 float)
 Top Dimension    | Select     | e.g. "novel_capability"
-Review Status    | Status     | Options: To Review, Approved, Rejected, Snoozed
+Review Status    | Select     | Options: To Review, Approved, Rejected, Snoozed
 Published        | Date       | Article publication date
 URL              | URL        | Original article URL
 Enrichment       | Select     | Options: pending, in_progress, complete, failed, skipped
-Gate 2           | Status     | Options: Not Started, To Review, Approved, Rejected
+Gate 2           | Select     | Options: Not Started, To Review, Approved, Rejected
 Snooze Until     | Date       | Date when a snoozed card re-appears
 Attempts         | Number     | Enrichment attempt count
 

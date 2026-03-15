@@ -30,21 +30,24 @@ _GATE2_STATUS_MAP: dict[str, str] = {
 
 
 def _extract_status_name(page: dict, property_name: str) -> str | None:
-    """Extract a status property value from a Notion page dict.
+    """Extract a select property value from a Notion page dict.
+
+    Tries select type first (Review Status and Gate 2 are created via API as
+    select properties), then falls back to status type for resilience.
 
     Args:
         page: Notion page object.
-        property_name: Name of the status property.
+        property_name: Name of the select property.
 
     Returns:
         Status name string, or None if not present.
     """
     props = page.get("properties", {})
     prop = props.get(property_name, {})
-    status = prop.get("status")
-    if not status:
+    select = prop.get("select") or prop.get("status")
+    if not select:
         return None
-    return status.get("name")
+    return select.get("name")
 
 
 def _extract_notion_page_id(page: dict) -> str:
@@ -103,11 +106,11 @@ async def poll_notion_status(db_path: Path) -> int:
                 "or": [
                     {
                         "property": "Review Status",
-                        "status": {"does_not_equal": "To Review"},
+                        "select": {"does_not_equal": "To Review"},
                     },
                     {
                         "property": "Gate 2",
-                        "status": {"does_not_equal": "Not Started"},
+                        "select": {"does_not_equal": "Not Started"},
                     },
                 ]
             }

@@ -37,11 +37,6 @@ def _load_daily_cap(rubric_path: Path) -> int:
         return 5
 
 
-def _build_review_status_property(status_name: str) -> dict:
-    """Build a Notion status property value dict."""
-    return {"status": {"name": status_name}}
-
-
 def _build_select_property(value: str) -> dict:
     """Build a Notion select property value dict."""
     return {"select": {"name": value}}
@@ -101,11 +96,11 @@ def _build_card_properties(card, score: RubricScore) -> dict:
         "Tier": _build_select_property(str(card.tier)),
         "Score": _build_number_property(card.relevance_score),
         "Top Dimension": _build_select_property(score.top_dimension),
-        "Review Status": _build_review_status_property("To Review"),
+        "Review Status": _build_select_property("To Review"),
         "Published": _build_date_property(card.date.isoformat()),
         "URL": _build_url_property(card.url),
         "Enrichment": _build_select_property(card.enrichment_state),
-        "Gate 2": _build_review_status_property("Not Started"),
+        "Gate 2": _build_select_property("Not Started"),
         "Attempts": _build_number_property(card.enrichment_attempt_count),
     }
 
@@ -311,7 +306,7 @@ async def deliver_gate2_to_notion(card_id: int, db_path: Path) -> None:
                 card.notion_page_id,
                 {
                     "Enrichment": _build_select_property("complete"),
-                    "Gate 2": _build_review_status_property("To Review"),
+                    "Gate 2": _build_select_property("To Review"),
                 },
             )
             client.update_page_content(card.notion_page_id, enrichment_blocks)
@@ -327,11 +322,11 @@ async def deliver_gate2_to_notion(card_id: int, db_path: Path) -> None:
                 properties = {
                     "Title": _build_title_property(card.title),
                     "Enrichment": _build_select_property("complete"),
-                    "Gate 2": _build_review_status_property("To Review"),
+                    "Gate 2": _build_select_property("To Review"),
                 }
             # Override enrichment and gate2 status
             properties["Enrichment"] = _build_select_property("complete")
-            properties["Gate 2"] = _build_review_status_property("To Review")
+            properties["Gate 2"] = _build_select_property("To Review")
 
             page_id = client.create_page(properties, enrichment_blocks)
             async with get_connection(db_path) as db:
