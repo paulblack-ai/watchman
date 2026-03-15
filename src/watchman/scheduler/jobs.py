@@ -243,6 +243,74 @@ def schedule_daily_digest_job(
     logger.info("Scheduled daily health digest job at 08:00 AM")
 
 
+def run_notion_delivery_job(db_path: Path, rubric_path: Path) -> None:
+    """Sync wrapper that runs async Notion delivery via asyncio.run().
+
+    Called by APScheduler's thread pool. Delivers top-scored signal cards
+    to the configured Notion database.
+
+    Args:
+        db_path: Path to the SQLite database.
+        rubric_path: Path to the rubric YAML config.
+    """
+    from watchman.notion.delivery import deliver_daily_review_notion_sync  # noqa: PLC0415
+
+    deliver_daily_review_notion_sync(db_path, rubric_path)
+
+
+def schedule_notion_delivery_job(
+    scheduler: BackgroundScheduler, db_path: Path, rubric_path: Path
+) -> None:
+    """Register a daily 9 AM Notion delivery job with the scheduler.
+
+    Args:
+        scheduler: The APScheduler BackgroundScheduler to add the job to.
+        db_path: Path to the SQLite database.
+        rubric_path: Path to the rubric YAML config.
+    """
+    scheduler.add_job(
+        run_notion_delivery_job,
+        trigger=CronTrigger(hour=9, minute=0),
+        args=[db_path, rubric_path],
+        id="deliver-daily-review-notion",
+        replace_existing=True,
+    )
+    logger.info("Scheduled Notion daily review delivery job at 09:00 AM")
+
+
+def run_notion_poll_job(db_path: Path) -> None:
+    """Sync wrapper that runs async Notion polling via asyncio.run().
+
+    Called by APScheduler's thread pool. Polls Notion for Review Status and
+    Gate 2 status changes, syncing them back to SQLite.
+
+    Args:
+        db_path: Path to the SQLite database.
+    """
+    from watchman.notion.poller import poll_notion_status_sync  # noqa: PLC0415
+
+    poll_notion_status_sync(db_path)
+
+
+def schedule_notion_poll_job(
+    scheduler: BackgroundScheduler, db_path: Path
+) -> None:
+    """Register a 45-second interval Notion polling job with the scheduler.
+
+    Args:
+        scheduler: The APScheduler BackgroundScheduler to add the job to.
+        db_path: Path to the SQLite database.
+    """
+    scheduler.add_job(
+        run_notion_poll_job,
+        trigger=IntervalTrigger(seconds=45),
+        args=[db_path],
+        id="poll-notion-status",
+        replace_existing=True,
+    )
+    logger.info("Scheduled Notion status poll job every 45 seconds")
+
+
 def schedule_delivery_job(
     scheduler: BackgroundScheduler, db_path: Path, rubric_path: Path
 ) -> None:

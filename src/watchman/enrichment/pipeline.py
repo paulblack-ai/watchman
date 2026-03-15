@@ -92,10 +92,17 @@ async def enrich_approved_card(
             )
             return None
 
-    # Deliver Gate 2 Slack card outside the DB connection (OUT-01)
+    # Deliver Gate 2 card outside the DB connection (OUT-01)
+    # Use Notion when NOTION_TOKEN is set, fall back to Slack otherwise
     if entry is not None:
         try:
-            await async_deliver_gate2_card(card_id, db_path)
+            notion_token = os.environ.get("NOTION_TOKEN")
+            if notion_token:
+                from watchman.notion.delivery import deliver_gate2_to_notion  # noqa: PLC0415
+
+                await deliver_gate2_to_notion(card_id, db_path)
+            else:
+                await async_deliver_gate2_card(card_id, db_path)
         except Exception:
             logger.exception(
                 "Gate 2 delivery failed for card %d (card is enriched, delivery will retry)",
