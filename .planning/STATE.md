@@ -5,7 +5,7 @@ milestone_name: milestone
 status: verifying
 stopped_at: "Completed quick task 13: Redeploy Watchman to company EC2"
 last_updated: "2026-03-15T03:56:14.399Z"
-last_activity: "2026-03-15 - Completed quick task 12: Swap Watchman Scoring Model from Haiku to Gemini Flash"
+last_activity: "2026-03-15 - Completed quick task 13: Redeploy Watchman to Company EC2"
 progress:
   total_phases: 7
   completed_phases: 7
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 Phase: 7 of 7 — All complete
 Plan: All plans complete
 Status: Human verification passed (7/7 tests), ready for milestone completion
-Last activity: 2026-03-15 - Completed quick task 12: Swap Watchman Scoring Model from Haiku to Gemini Flash
+Last activity: 2026-03-15 - Completed quick task 13: Redeploy Watchman to Company EC2
 
 Progress: [██████████] 100%
 
