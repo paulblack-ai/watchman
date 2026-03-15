@@ -73,6 +73,7 @@ Recent decisions affecting current work:
 - Changelog detection: source_name contains "Changelog" OR tier 3 + scrape collector
 - Split cards get unique url_hash by appending #title to URL before hashing
 - LLM imports lazy in normalizer to avoid hard anthropic dependency at module load
+- Scoring model swapped from anthropic/claude-haiku-4.5 to google/gemini-2.0-flash-001 (~10x cheaper); WATCHMAN_SCORING_MODEL env var allows override
 - JinaCollector added for sites blocking direct scrapers (uses r.jina.ai markdown API)
 - Anthropic and Meta AI have no public RSS feeds; switched to Jina-based collection
 - Changelog detection may need update: some changelogs now use "jina" collector type instead of "scrape"
@@ -107,9 +108,10 @@ None yet.
 | 9 | Migrate Watchman to company EC2 instance | 2026-03-13 | 81110d8 | [9-migrate-watchman-to-company-ec2-instance](./quick/9-migrate-watchman-to-company-ec2-instance/) |
 | 10 | Notion migration: replace Slack review surface | 2026-03-14 | cfd5a30 | [10-watchman-notion-migration-replace-slack-](./quick/10-watchman-notion-migration-replace-slack-/) |
 | 11 | Fix Notion poller for select-type properties | 2026-03-15 | 2feb012 | [11-fix-notion-poller-for-select-properties](./quick/11-fix-notion-poller-for-select-properties/) |
+| 12 | Swap scoring model from Haiku to Gemini 2.0 Flash | 2026-03-15 | 3fe9c4b | [12-swap-watchman-scoring-model-from-haiku-t](./quick/12-swap-watchman-scoring-model-from-haiku-t/) |
 
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Completed quick task 11 (Fix Notion poller for select-type properties)
+Stopped at: Completed quick task 12 (Swap scoring model from Haiku to Gemini 2.0 Flash)
 Resume file: .planning/phases/07-audit-gap-closure-runtime-fixes/.continue-here.md
