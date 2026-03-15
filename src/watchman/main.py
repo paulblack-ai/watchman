@@ -62,23 +62,51 @@ def main() -> None:
     logger.info("Initializing database at %s", db_path)
     asyncio.run(init_db(db_path))
 
-    # Slack integration (graceful degradation when tokens are missing)
-    slack_token = os.environ.get("SLACK_BOT_TOKEN")
-    slack_app_token = os.environ.get("SLACK_APP_TOKEN")
-    slack_enabled = bool(slack_token and slack_app_token)
+    # Notion integration (replaces Slack as review surface)
+    notion_token = os.environ.get("NOTION_TOKEN")
+    notion_db_id = os.environ.get("NOTION_DATABASE_ID")
+    notion_enabled = bool(notion_token and notion_db_id)
 
-    if slack_enabled:
-        # Import here to avoid import-time side effects when Slack is not configured
-        from watchman.slack.app import create_slack_app, start_socket_mode  # noqa: PLC0415
+    if notion_enabled:
+        from watchman.notion.client import NotionClient  # noqa: PLC0415
+        from watchman.notion.setup import validate_database_schema  # noqa: PLC0415
 
-        slack_app = create_slack_app()
-        start_socket_mode(slack_app)
-        logger.info("Slack listener started")
+        try:
+            client = NotionClient(token=notion_token, database_id=notion_db_id)
+            schema_check = asyncio.run(validate_database_schema(client))
+            missing = [k for k, v in schema_check.items() if not v]
+            if missing:
+                logger.warning(
+                    "Notion database missing properties: %s", ", ".join(missing)
+                )
+            else:
+                logger.info("Notion database schema validated")
+        except Exception:
+            logger.exception("Failed to validate Notion database schema")
     else:
-        logger.warning(
-            "SLACK_BOT_TOKEN/SLACK_APP_TOKEN not set, Slack features disabled"
-        )
-        slack_app = None
+        logger.warning("NOTION_TOKEN/NOTION_DATABASE_ID not set, Notion features disabled")
+
+    # Slack integration (legacy — only active if Notion is not configured)
+    slack_enabled = False
+    if not notion_enabled:
+        slack_token = os.environ.get("SLACK_BOT_TOKEN")
+        slack_app_token = os.environ.get("SLACK_APP_TOKEN")
+        slack_enabled = bool(slack_token and slack_app_token)
+        if slack_enabled:
+            from watchman.slack.app import create_slack_app, start_socket_mode  # noqa: PLC0415
+
+            slack_app = create_slack_app()
+            start_socket_mode(slack_app)
+            logger.info("Slack listener started (legacy mode)")
+        else:
+            logger.warning(
+                "No review surface configured (set NOTION_TOKEN or SLACK_BOT_TOKEN)"
+            )
+
+    logger.info(
+        "Review surface: %s",
+        "Notion" if notion_enabled else "Slack" if slack_enabled else "None",
+    )
 
     # Import scheduler after DB init to avoid circular imports
     from watchman.scheduler.jobs import (  # noqa: PLC0415
@@ -86,6 +114,8 @@ def main() -> None:
         schedule_delivery_job,
         schedule_enrichment_job,
         schedule_normalizer_job,
+        schedule_notion_delivery_job,
+        schedule_notion_poll_job,
         schedule_scoring_job,
         setup_scheduler,
     )
@@ -93,7 +123,7 @@ def main() -> None:
     # Set up scheduler with collection jobs and scoring job
     scheduler = setup_scheduler(enabled_sources, db_path, rubric_path)
 
-    # Add enrichment fallback job (runs regardless of Slack)
+    # Add enrichment fallback job (runs regardless of review surface)
     schedule_enrichment_job(scheduler, db_path)
 
     # Build source_configs from full registry for normalizer tier lookup
@@ -101,11 +131,15 @@ def main() -> None:
     # sources still get correct tier assignment
     source_configs: dict[str, object] = {s.name: s for s in registry.sources}
 
-    # Add normalizer job (runs unconditionally — no Slack dependency)
+    # Add normalizer job (runs unconditionally — no review surface dependency)
     schedule_normalizer_job(scheduler, db_path, source_configs)
 
-    # Add daily delivery job only when Slack is configured
-    if slack_enabled:
+    if notion_enabled:
+        # Notion delivery and polling (replaces Slack delivery)
+        schedule_notion_delivery_job(scheduler, db_path, rubric_path)
+        schedule_notion_poll_job(scheduler, db_path)
+    elif slack_enabled:
+        # Slack delivery (legacy — only when Notion not configured)
         schedule_delivery_job(scheduler, db_path, rubric_path)
 
         # Add daily health digest only when Slack + Paul's user ID are available
