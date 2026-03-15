@@ -1,12 +1,12 @@
-"""Claude Haiku-based relevance scorer for signal cards."""
+"""LLM-based relevance scorer for signal cards."""
 from __future__ import annotations
 
 
 import asyncio
 import logging
+import os
 from pathlib import Path
 
-import anthropic
 import aiosqlite
 
 from watchman.llm_client import get_client
@@ -20,9 +20,29 @@ logger = logging.getLogger(__name__)
 
 SCORING_CONCURRENCY = 20
 
+# Fallback: set WATCHMAN_SCORING_MODEL=anthropic/claude-haiku-4.5 to revert to Haiku
+DEFAULT_SCORING_MODEL = "google/gemini-2.0-flash-001"
+
+
+def _get_scoring_model() -> str:
+    """Return scoring model from WATCHMAN_SCORING_MODEL env var or default."""
+    return os.environ.get("WATCHMAN_SCORING_MODEL", DEFAULT_SCORING_MODEL)
+
+
+def _sanitize_json_escapes(text: str) -> str:
+    """Fix Flash-specific JSON escape quirks before parsing.
+
+    Gemini Flash sometimes produces invalid JSON escape sequences:
+    - \\/ instead of / (escaped forward slash, valid in JSON spec but can cause issues)
+    - \\' instead of ' (invalid JSON escape)
+    """
+    text = text.replace("\\/", "/")
+    text = text.replace("\\'", "'")
+    return text
+
 
 def _build_scoring_prompt(card: SignalCard, rubric: RubricConfig) -> str:
-    """Build the scoring prompt for Claude Haiku.
+    """Build the scoring prompt for the LLM scorer.
 
     Args:
         card: Signal card to score.
@@ -53,7 +73,7 @@ Respond with ONLY this JSON (no markdown, no extra text):
 
 
 async def score_card(card: SignalCard, rubric: RubricConfig) -> RubricScore:
-    """Score a signal card using Claude Haiku structured outputs.
+    """Score a signal card using LLM structured outputs via OpenRouter.
 
     Args:
         card: Signal card to score.
@@ -63,7 +83,6 @@ async def score_card(card: SignalCard, rubric: RubricConfig) -> RubricScore:
         RubricScore with per-dimension scores, composite score, and top dimension.
 
     Raises:
-        anthropic.APIError: If the Anthropic API call fails.
         ValueError: If the response cannot be parsed as a valid RubricScore.
     """
     client = get_client()
@@ -71,7 +90,7 @@ async def score_card(card: SignalCard, rubric: RubricConfig) -> RubricScore:
 
     response = await asyncio.to_thread(
         client.messages.create,
-        model="anthropic/claude-haiku-4.5",
+        model=_get_scoring_model(),
         max_tokens=1024,
         messages=[{"role": "user", "content": prompt}],
     )
@@ -81,6 +100,8 @@ async def score_card(card: SignalCard, rubric: RubricConfig) -> RubricScore:
     if text.startswith("```"):
         lines = text.split("\n")
         text = "\n".join(lines[1:-1]).strip()
+
+    text = _sanitize_json_escapes(text)
 
     import json as _json
 
