@@ -54,6 +54,9 @@ class SignalCard(BaseModel):
     enrichment_attempt_count: int = 1
     output_path: str | None = None
 
+    # Notion integration
+    notion_page_id: str | None = None
+
     @staticmethod
     def compute_url_hash(url: str) -> str:
         """Compute SHA-256 hash of normalized URL for exact deduplication."""

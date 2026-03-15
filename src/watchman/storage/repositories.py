@@ -469,6 +469,8 @@ class CardRepository:
             gate2_slack_ts=safe_get("gate2_slack_ts"),
             enrichment_attempt_count=safe_get("enrichment_attempt_count") or 1,
             output_path=safe_get("output_path"),
+            # Notion integration
+            notion_page_id=safe_get("notion_page_id"),
         )
 
 
@@ -550,6 +552,52 @@ class CardRepository:
                WHERE enrichment_state = 'complete'
                AND gate2_state = 'pending'
                ORDER BY enriched_at ASC"""
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [self._row_to_card(row) for row in rows]
+
+    async def save_notion_page_id(self, card_id: int, page_id: str) -> None:
+        """Persist the Notion page ID for a signal card.
+
+        Args:
+            card_id: ID of the card to update.
+            page_id: Notion page ID returned from create_page().
+        """
+        await self.db.execute(
+            "UPDATE cards SET notion_page_id = ? WHERE id = ?",
+            (page_id, card_id),
+        )
+        await self.db.commit()
+
+    async def find_cards_with_notion_page(self) -> list[SignalCard]:
+        """Find pending cards that have been delivered to Notion.
+
+        Used by the poller to check for Review Status changes in Notion.
+
+        Returns:
+            List of SignalCard instances with a notion_page_id and pending review.
+        """
+        async with self.db.execute(
+            """SELECT * FROM cards
+               WHERE notion_page_id IS NOT NULL
+               AND review_state = 'pending'
+               ORDER BY created_at DESC"""
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [self._row_to_card(row) for row in rows]
+
+    async def find_cards_needing_notion_sync(self) -> list[SignalCard]:
+        """Find scored cards that have not yet been pushed to Notion.
+
+        Returns:
+            List of SignalCard instances with a score but no notion_page_id.
+        """
+        async with self.db.execute(
+            """SELECT * FROM cards
+               WHERE relevance_score IS NOT NULL
+               AND duplicate_of IS NULL
+               AND notion_page_id IS NULL
+               ORDER BY relevance_score DESC"""
         ) as cursor:
             rows = await cursor.fetchall()
             return [self._row_to_card(row) for row in rows]

@@ -135,6 +135,9 @@ async def init_db(db_path: Path) -> None:
     # Apply Phase 4 schema migration (idempotent)
     await migrate_phase4(db_path)
 
+    # Apply Notion schema migration (idempotent)
+    await migrate_notion(db_path)
+
 
 async def migrate_phase3(db_path: Path) -> None:
     """Apply Phase 3 schema migration: add enrichment columns to cards.
@@ -189,6 +192,37 @@ async def migrate_phase4(db_path: Path) -> None:
 
     new_indexes = [
         "CREATE INDEX IF NOT EXISTS idx_cards_gate2_state ON cards(gate2_state)",
+    ]
+
+    async with aiosqlite.connect(str(db_path)) as db:
+        for statement in new_columns:
+            try:
+                await db.execute(statement)
+            except Exception:
+                # Column already exists -- migration is idempotent
+                pass
+
+        for statement in new_indexes:
+            await db.execute(statement)
+
+        await db.commit()
+
+
+async def migrate_notion(db_path: Path) -> None:
+    """Apply Notion schema migration: add notion_page_id column to cards.
+
+    This migration is idempotent -- running it multiple times is safe.
+    The ALTER TABLE is wrapped in try/except to handle duplicate column errors.
+
+    Args:
+        db_path: Path to the SQLite database file.
+    """
+    new_columns = [
+        "ALTER TABLE cards ADD COLUMN notion_page_id TEXT",
+    ]
+
+    new_indexes = [
+        "CREATE INDEX IF NOT EXISTS idx_cards_notion_page_id ON cards(notion_page_id)",
     ]
 
     async with aiosqlite.connect(str(db_path)) as db:
