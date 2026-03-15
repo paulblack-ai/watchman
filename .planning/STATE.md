@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 Phase: 7 of 7 — All complete
 Plan: All plans complete
 Status: Human verification passed (7/7 tests), ready for milestone completion
-Last activity: 2026-03-15 - Completed quick task 11: Fix Notion Poller for Select Properties
+Last activity: 2026-03-15 - Completed quick task 12: Swap Watchman Scoring Model from Haiku to Gemini Flash
 
 Progress: [██████████] 100%
 
