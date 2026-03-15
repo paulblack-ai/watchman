@@ -9,7 +9,7 @@ import pytest
 from watchman.models.signal_card import SignalCard
 from watchman.scoring.models import DimensionScore, RubricScore
 from watchman.scoring.rubric import RubricConfig, RubricDimension, load_rubric
-from watchman.scoring.scorer import _build_scoring_prompt, score_card
+from watchman.scoring.scorer import _build_scoring_prompt, score_card, _get_scoring_model, _sanitize_json_escapes, DEFAULT_SCORING_MODEL
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -185,6 +185,50 @@ def test_build_scoring_prompt_includes_weights(
 
 
 # ---------------------------------------------------------------------------
+# Unit tests: model configuration and JSON sanitization
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_default_scoring_model_is_gemini_flash() -> None:
+    """DEFAULT_SCORING_MODEL should be Gemini 2.0 Flash."""
+    assert DEFAULT_SCORING_MODEL == "google/gemini-2.0-flash-001"
+
+
+@pytest.mark.unit
+def test_get_scoring_model_returns_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    """_get_scoring_model should return default when env var is not set."""
+    monkeypatch.delenv("WATCHMAN_SCORING_MODEL", raising=False)
+    assert _get_scoring_model() == "google/gemini-2.0-flash-001"
+
+
+@pytest.mark.unit
+def test_get_scoring_model_respects_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
+    """_get_scoring_model should return env var value when set."""
+    monkeypatch.setenv("WATCHMAN_SCORING_MODEL", "anthropic/claude-haiku-4.5")
+    assert _get_scoring_model() == "anthropic/claude-haiku-4.5"
+
+
+@pytest.mark.unit
+def test_sanitize_json_escapes_forward_slash() -> None:
+    """_sanitize_json_escapes should fix escaped forward slashes."""
+    assert _sanitize_json_escapes('{"url":"https:\\/\\/example.com"}') == '{"url":"https://example.com"}'
+
+
+@pytest.mark.unit
+def test_sanitize_json_escapes_single_quote() -> None:
+    """_sanitize_json_escapes should fix escaped single quotes."""
+    assert _sanitize_json_escapes("{\\'key\\': \\'value\\'}") == "{'key': 'value'}"
+
+
+@pytest.mark.unit
+def test_sanitize_json_escapes_clean_input() -> None:
+    """_sanitize_json_escapes should not modify clean JSON."""
+    clean = '{"score": 8.5, "rationale": "Good signal"}'
+    assert _sanitize_json_escapes(clean) == clean
+
+
+# ---------------------------------------------------------------------------
 # Integration tests: mocked score_card
 # ---------------------------------------------------------------------------
 
@@ -210,10 +254,10 @@ async def test_score_card_returns_rubric_score(
 
 
 @pytest.mark.integration
-async def test_score_card_uses_correct_model(
+async def test_score_card_uses_default_model(
     sample_card: SignalCard, rubric: RubricConfig, sample_rubric_score: RubricScore
 ) -> None:
-    """score_card should use claude-haiku-4.5 model via OpenRouter."""
+    """score_card should use Gemini Flash model via OpenRouter by default."""
     mock_response = MagicMock()
     mock_response.content = [MagicMock(text=sample_rubric_score.model_dump_json())]
 
@@ -225,7 +269,7 @@ async def test_score_card_uses_correct_model(
         await score_card(sample_card, rubric)
 
         call_kwargs = mock_client.messages.create.call_args
-        assert call_kwargs.kwargs["model"] == "anthropic/claude-haiku-4.5"
+        assert call_kwargs.kwargs["model"] == "google/gemini-2.0-flash-001"
 
 
 @pytest.mark.integration
@@ -247,3 +291,24 @@ async def test_score_card_sends_prompt(
         messages = call_kwargs.kwargs["messages"]
         assert len(messages) == 1
         assert messages[0]["role"] == "user"
+
+
+@pytest.mark.integration
+async def test_score_card_uses_env_var_model(
+    sample_card: SignalCard, rubric: RubricConfig, sample_rubric_score: RubricScore,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """score_card should use model from WATCHMAN_SCORING_MODEL env var."""
+    monkeypatch.setenv("WATCHMAN_SCORING_MODEL", "anthropic/claude-haiku-4.5")
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=sample_rubric_score.model_dump_json())]
+
+    with patch("watchman.scoring.scorer.get_client") as mock_get_client:
+        mock_client = MagicMock()
+        mock_get_client.return_value = mock_client
+        mock_client.messages.create.return_value = mock_response
+
+        await score_card(sample_card, rubric)
+
+        call_kwargs = mock_client.messages.create.call_args
+        assert call_kwargs.kwargs["model"] == "anthropic/claude-haiku-4.5"
