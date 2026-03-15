@@ -106,9 +106,10 @@ None yet.
 | 8 | Fix broken VentureBeat and Figma sources | 2026-03-13 | 763a8d7 | [8-fix-broken-watchman-sources-venturebeat-](./quick/8-fix-broken-watchman-sources-venturebeat-/) |
 | 9 | Migrate Watchman to company EC2 instance | 2026-03-13 | 81110d8 | [9-migrate-watchman-to-company-ec2-instance](./quick/9-migrate-watchman-to-company-ec2-instance/) |
 | 10 | Notion migration: replace Slack review surface | 2026-03-14 | cfd5a30 | [10-watchman-notion-migration-replace-slack-](./quick/10-watchman-notion-migration-replace-slack-/) |
+| 11 | Fix Notion poller for select-type properties | 2026-03-15 | 2feb012 | [11-fix-notion-poller-for-select-properties](./quick/11-fix-notion-poller-for-select-properties/) |
 
 ## Session Continuity
 
-Last session: 2026-03-14
-Stopped at: Completed quick task 10 (Notion migration — replace Slack review surface)
+Last session: 2026-03-15
+Stopped at: Completed quick task 11 (Fix Notion poller for select-type properties)
 Resume file: .planning/phases/07-audit-gap-closure-runtime-fixes/.continue-here.md
